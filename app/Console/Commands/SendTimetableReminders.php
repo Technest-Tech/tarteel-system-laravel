@@ -45,14 +45,17 @@ class SendTimetableReminders extends Command
         $supportEmail = Setting::get('support_email', '');
         
         foreach ($timetableEntries as $entry) {
-            // Calculate when notification should be sent
+            // Calculate lesson start time
             $startTime = Carbon::parse($entry->start_date . ' ' . $entry->start_time);
-            $notificationTime = $startTime->copy()->subMinutes($entry->notification_minutes);
             
-            // Check if current time is within 1 minute window of notification time
-            $timeDiff = abs($now->diffInMinutes($notificationTime));
+            // Calculate minutes remaining until lesson
+            $minutesUntilLesson = $now->diffInMinutes($startTime, false);
             
-            if ($timeDiff <= 1) {
+            // Send email if:
+            // 1. Lesson hasn't started yet (minutesUntilLesson >= 0)
+            // 2. Time remaining is less than or equal to notification_minutes
+            // This means: if lesson is in 30 minutes or less, send it immediately
+            if ($minutesUntilLesson >= 0 && $minutesUntilLesson <= $entry->notification_minutes) {
                 // Send email to teacher
                 if ($entry->teacher && $entry->teacher->email) {
                     try {
