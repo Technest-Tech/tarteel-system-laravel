@@ -1,13 +1,24 @@
 @extends('layouts.index')
 
 @section('content')
-@php dd(auth()->user()); @endphp
     <div class="page-content-wrapper border">
 
         <!-- Title -->
         <div class="row">
             <div class="col-12 mb-3">
                 <h1 class="h3 mb-2 mb-sm-0 text-end">احصائيات هذا الشهر</h1>
+                <div class="text-end">
+                    <form method="GET" action="{{ route('admin.dashboard') }}" class="d-inline">
+                        <select name="year" class="form-select d-inline-block w-auto" onchange="this.form.submit()">
+                            @for($y = 2029; $y >= date('Y') - 5; $y--)
+                                <option value="{{ $y }}" {{ request('year', date('Y')) == $y ? 'selected' : '' }}>
+                                    {{ $y }}
+                                </option>
+                            @endfor
+                        </select>
+                        <label class="ms-2">اختر السنة</label>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -20,7 +31,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <!-- Digit -->
                             <div>
-                                <h2 class="mb-0 fw-bold">{{\App\Models\Billings::whereMonth('created_at',\Carbon\Carbon::now()->month)->where('currency','USD')->sum('amount')}}</h2>
+                                <h2 class="mb-0 fw-bold">{{\App\Models\Billings::whereMonth('created_at',\Carbon\Carbon::now()->month)->where('year',request('year',date('Y')))->where('currency','USD')->sum('amount')}}</h2>
                                 <span class="mb-0 h5 fw-light">دولار</span>
                             </div>
                             <!-- Icon -->
@@ -35,7 +46,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <!-- Digit -->
                             <div>
-                                <h2 class=" mb-0 fw-bold">{{\App\Models\Billings::whereMonth('created_at',\Carbon\Carbon::now()->month)->where('currency','GBP')->sum('amount')}}</h2>
+                                <h2 class=" mb-0 fw-bold">{{\App\Models\Billings::whereMonth('created_at',\Carbon\Carbon::now()->month)->where('year',request('year',date('Y')))->where('currency','GBP')->sum('amount')}}</h2>
                                 <span class="mb-0 h5 fw-light">جنيه استرليني</span>
                             </div>
                             <!-- Icon -->
@@ -50,7 +61,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <!-- Digit -->
                             <div>
-                                <h2 class="mb-0 fw-bold">{{\App\Models\Billings::whereMonth('created_at',\Carbon\Carbon::now()->month)->where('currency','EUR')->sum('amount')}}</h2>
+                                <h2 class="mb-0 fw-bold">{{\App\Models\Billings::whereMonth('created_at',\Carbon\Carbon::now()->month)->where('year',request('year',date('Y')))->where('currency','EUR')->sum('amount')}}</h2>
                                 <span class="mb-0 h5 fw-light">يورو</span>
                             </div>
                             <!-- Icon -->
@@ -64,7 +75,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <!-- Digit -->
                             <div>
-                                <h2 class="mb-0 fw-bold">{{\App\Models\Billings::whereMonth('created_at',\Carbon\Carbon::now()->month)->where('currency','NZD')->sum('amount')}}</h2>
+                                <h2 class="mb-0 fw-bold">{{\App\Models\Billings::whereMonth('created_at',\Carbon\Carbon::now()->month)->where('year',request('year',date('Y')))->where('currency','NZD')->sum('amount')}}</h2>
                                 <span class="mb-0 h5 fw-light">دولار نيوزلندي</span>
                             </div>
                             <!-- Icon -->
@@ -78,7 +89,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <!-- Digit -->
                             <div>
-                                <h2 class="mb-0 fw-bold">{{\App\Models\Billings::whereMonth('created_at',\Carbon\Carbon::now()->month)->where('currency','CAD')->sum('amount')}}</h2>
+                                <h2 class="mb-0 fw-bold">{{\App\Models\Billings::whereMonth('created_at',\Carbon\Carbon::now()->month)->where('year',request('year',date('Y')))->where('currency','CAD')->sum('amount')}}</h2>
                                 <span class="mb-0 h5 fw-light">دولار كندي</span>
                             </div>
                             <!-- Icon -->
@@ -130,7 +141,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <!-- Digit -->
                             <div>
-                                <h2 class="mb-0 fw-bold">{{\App\Models\Lessons::where('teacher_id',auth()->user()->id)->whereMonth('created_at', \Carbon\Carbon::now()->month)->sum('lesson_duration')}}</h2>                                <span class="mb-0 h5 fw-light">اجمالي ساعات هذا الشهر</span>
+                                <h2 class="mb-0 fw-bold">{{\App\Models\Lessons::where('teacher_id',auth()->user()->id)->whereMonth('created_at', \Carbon\Carbon::now()->month)->whereYear('created_at', request('year', date('Y')))->sum('lesson_duration')}}</h2>                                <span class="mb-0 h5 fw-light">اجمالي ساعات هذا الشهر</span>
                             </div>
                             <!-- Icon -->
                             <div class="icon-lg rounded-circle bg-warning text-white mb-0"><i class="fas fa-clock"></i></div>

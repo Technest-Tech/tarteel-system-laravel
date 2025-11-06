@@ -14,6 +14,7 @@ class LessonsController extends Controller
     {
         $lessons = Lessons::where('course_id', $course_id)
             ->whereMonth('created_at', $month)
+            ->whereYear('created_at', now()->year)
             ->get();
         return view('teacher.lessons.index', compact('lessons','month','course_id'));
     }

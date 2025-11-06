@@ -1,0 +1,1077 @@
+/* Calendar Custom Styles */
+#calendar {
+    min-height: 600px;
+    width: 100%;
+    position: relative;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.fc {
+    direction: rtl;
+    font-family: 'Almarai', 'Arial', sans-serif;
+    width: 100%;
+    min-height: 600px;
+}
+
+/* Ensure calendar is scrollable on mobile */
+.fc-scroller {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Responsive table for calendar */
+@media (max-width: 768px) {
+    .fc-scroller {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .fc-daygrid-body,
+    .fc-timegrid-body {
+        min-width: 600px;
+    }
+}
+
+/* View Toggle Buttons */
+.view-toggle-group {
+    margin-bottom: 1rem;
+}
+
+.view-toggle-btn {
+    border: 1px solid #066ac9;
+    color: #066ac9;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.view-toggle-btn:hover {
+    background-color: #066ac9;
+    color: white;
+    border-color: #066ac9;
+}
+
+.view-toggle-btn.active {
+    background-color: #066ac9;
+    color: white;
+    border-color: #066ac9;
+}
+
+/* Filter Section */
+.card.bg-transparent {
+    background-color: transparent;
+}
+
+/* Day Row in Form */
+.day-row {
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.day-row:hover {
+    background-color: #e9ecef;
+    border-color: #066ac9 !important;
+}
+
+.day-row h6 {
+    color: #066ac9;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.fc-toolbar {
+    flex-direction: row-reverse;
+}
+
+.fc-toolbar-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #066ac9;
+}
+
+.fc-button-group {
+    flex-direction: row-reverse;
+}
+
+.fc-button {
+    background-color: #066ac9;
+    border-color: #066ac9;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.fc-button:hover {
+    background-color: #055a9e;
+    border-color: #055a9e;
+}
+
+.fc-button:focus {
+    box-shadow: 0 0 0 0.2rem rgba(6, 106, 201, 0.25);
+}
+
+.fc-button-active {
+    background-color: #055a9e;
+    border-color: #055a9e;
+}
+
+.fc-button-primary:not(:disabled):active {
+    background-color: #044d87;
+    border-color: #044d87;
+}
+
+.fc-daygrid-day-number {
+    padding: 0.5rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.fc-day-today {
+    background-color: #e7f3ff !important;
+}
+
+.fc-day-today .fc-daygrid-day-number {
+    color: #066ac9;
+    font-weight: 700;
+}
+
+.fc-event {
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: visible !important;
+    white-space: normal !important;
+    min-height: auto !important;
+    line-height: 1.5 !important;
+}
+
+.fc-event:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.fc-event-title {
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    line-height: 1.4 !important;
+    margin-bottom: 0.25rem !important;
+    color: #fff !important;
+}
+
+.fc-daygrid-event {
+    margin: 3px 0 !important;
+    overflow: visible !important;
+    min-height: auto !important;
+}
+
+.fc-daygrid-event .fc-event {
+    min-height: auto !important;
+    height: auto !important;
+}
+
+.fc-daygrid-event .fc-event-title {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+}
+
+.fc-event-title-container {
+    overflow: visible !important;
+    white-space: normal !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.25rem !important;
+}
+
+.fc-event-main-frame {
+    overflow: visible !important;
+    white-space: normal !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+}
+
+.fc-event-main {
+    overflow: visible !important;
+    white-space: normal !important;
+}
+
+.fc-event-time {
+    font-weight: 500 !important;
+    font-size: 0.75rem !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    margin-top: 0.25rem !important;
+    padding-top: 0.25rem !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: #fff !important;
+    opacity: 0.9;
+}
+
+.fc-event-teacher {
+    font-weight: 500 !important;
+    font-size: 0.8rem !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    line-height: 1.3 !important;
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+    opacity: 0.95;
+    color: #fff !important;
+}
+
+/* Ensure day cells can expand to fit content */
+.fc-daygrid-day-frame {
+    min-height: 120px !important;
+    overflow: visible !important;
+}
+
+.fc-daygrid-day-events {
+    overflow: visible !important;
+}
+
+.fc-timegrid-event {
+    border-radius: 0.25rem;
+}
+
+.fc-col-header-cell {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    padding: 0.75rem;
+    font-weight: 600;
+    color: #066ac9;
+    text-align: center;
+}
+
+/* Moved to after .fc-event-teacher */
+
+.fc-scrollgrid {
+    border-color: #dee2e6;
+}
+
+.fc-scrollgrid-section-header {
+    background-color: #f8f9fa;
+}
+
+/* RTL Support */
+.fc-direction-rtl .fc-toolbar > * > :not(:first-child) {
+    margin-left: 0.75em;
+    margin-right: 0;
+}
+
+.fc-direction-rtl .fc-daygrid-day-frame {
+    direction: rtl;
+}
+
+.fc-direction-rtl .fc-timegrid-col-frame {
+    direction: rtl;
+}
+
+/* Modal Styles */
+.modal {
+    z-index: 1000000 !important;
+}
+
+.modal-backdrop {
+    z-index: 999999 !important;
+}
+
+.modal-dialog {
+    z-index: 1000001 !important;
+}
+
+.modal-content {
+    border-radius: 0.5rem;
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    z-index: 1000002 !important;
+}
+
+.modal-header {
+    background-color: #066ac9;
+    color: white;
+    border-bottom: none;
+    border-radius: 0.5rem 0.5rem 0 0;
+    padding: 1.25rem;
+}
+
+.modal-header .btn-close {
+    filter: invert(1);
+}
+
+.modal-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #dee2e6;
+    padding: 1rem 1.5rem;
+}
+
+/* Form Styles */
+.form-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.form-control,
+.form-select {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #066ac9;
+    box-shadow: 0 0 0 0.2rem rgba(6, 106, 201, 0.25);
+    outline: 0;
+}
+
+.form-check-input:checked {
+    background-color: #066ac9;
+    border-color: #066ac9;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(6, 106, 201, 0.25);
+}
+
+/* Day Row Styles */
+.day-row {
+    padding: 0.75rem;
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+    margin-bottom: 0.5rem;
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+.day-row:hover {
+    background-color: #e9ecef;
+}
+
+.day-row input[type="time"]:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: #066ac9;
+    border-color: #066ac9;
+    color: white;
+    font-weight: 500;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #055a9e;
+    border-color: #055a9e;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(6, 106, 201, 0.3);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b;
+    border-color: #b02a37;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #066ac9;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    /* Tablet adjustments */
+    .fc-toolbar-title {
+        font-size: 1.3rem;
+    }
+    
+    .fc-daygrid-event {
+        font-size: 0.9rem !important;
+        padding: 6px 8px !important;
+    }
+    
+    .fc-event-title {
+        font-size: 0.9rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Mobile landscape and small tablets */
+    #calendar {
+        padding: 5px;
+        min-height: 500px;
+    }
+
+    .fc {
+        min-height: 500px;
+    }
+
+    .fc-toolbar {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0.5rem;
+    }
+
+    .fc-toolbar-title {
+        font-size: 1.1rem;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .fc-toolbar-chunk {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .fc-button-group {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .fc-button {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.8rem;
+        flex: 1;
+        min-width: calc(33.333% - 0.5rem);
+    }
+
+    .fc-daygrid-day-frame {
+        min-height: 70px;
+    }
+
+    .fc-daygrid-day-number {
+        font-size: 0.85rem;
+        padding: 4px;
+    }
+
+    .fc-daygrid-event {
+        font-size: 0.8rem !important;
+        padding: 4px 6px !important;
+        min-height: 35px !important;
+        margin: 2px 0 !important;
+    }
+
+    .fc-event-title {
+        font-size: 0.8rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .fc-event-time {
+        font-size: 0.7rem !important;
+    }
+
+    .fc-event-teacher {
+        font-size: 0.7rem !important;
+    }
+
+    .fc-timegrid-event {
+        padding: 6px 8px !important;
+        min-height: 60px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .fc-timegrid-slot {
+        min-height: 60px !important;
+    }
+
+    /* Modal adjustments */
+    .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+        z-index: 1000000 !important;
+    }
+
+    .modal {
+        z-index: 1000000 !important;
+    }
+
+    .modal-backdrop {
+        z-index: 999999 !important;
+    }
+
+    .modal-content {
+        border-radius: 0.5rem;
+        z-index: 1000001 !important;
+    }
+
+    .modal-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .modal-body {
+        padding: 1rem;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .modal-footer {
+        padding: 0.75rem 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+        margin: 0 !important;
+    }
+
+    /* Form adjustments */
+    .day-row {
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .day-row .col-md-2,
+    .day-row .col-md-5,
+    .day-row .col-md-3 {
+        width: 100%;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Filter section */
+    .row.mb-3 .card-body {
+        padding: 1rem;
+    }
+
+    .row.mb-3 .row.g-3 > div {
+        margin-bottom: 0.75rem;
+    }
+
+    .row.mb-3 .col-md-3 {
+        width: 100%;
+        margin-bottom: 0.75rem;
+    }
+
+    .form-select,
+    .form-control {
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .btn-sm {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    /* Export dropdown */
+    .btn-group {
+        width: 100%;
+    }
+
+    .btn-group .btn {
+        width: 100%;
+    }
+
+    .dropdown-menu {
+        width: 100%;
+        min-width: 100%;
+        left: 0 !important;
+        right: 0 !important;
+    }
+
+    /* Title and button row */
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .d-flex.justify-content-between .btn {
+        width: 100%;
+    }
+
+    h1.h3 {
+        font-size: 1.25rem;
+        text-align: center;
+    }
+
+    /* Card adjustments */
+    .card-body {
+        padding: 1rem;
+    }
+
+    /* Bulk adjustment section */
+    .card-header h6 {
+        font-size: 0.9rem;
+    }
+
+    .card-body .row.g-3 > div {
+        margin-bottom: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Small mobile devices */
+    #calendar {
+        padding: 3px;
+        min-height: 400px;
+    }
+
+    .fc {
+        min-height: 400px;
+    }
+
+    .fc-toolbar {
+        padding: 0.25rem;
+        gap: 0.5rem;
+    }
+
+    .fc-toolbar-title {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .fc-button {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.75rem;
+        min-width: calc(50% - 0.25rem);
+    }
+
+    .fc-daygrid-day-frame {
+        min-height: 60px;
+    }
+
+    .fc-daygrid-day-number {
+        font-size: 0.75rem;
+        padding: 2px;
+    }
+
+    .fc-daygrid-event {
+        font-size: 0.75rem !important;
+        padding: 3px 4px !important;
+        min-height: 30px !important;
+        margin: 1px 0 !important;
+    }
+
+    .fc-event-title {
+        font-size: 0.75rem !important;
+        line-height: 1.1 !important;
+    }
+
+    .fc-event-time {
+        font-size: 0.65rem !important;
+    }
+
+    .fc-event-teacher {
+        font-size: 0.65rem !important;
+    }
+
+    .fc-timegrid-event {
+        padding: 4px 6px !important;
+        min-height: 50px !important;
+        font-size: 0.75rem !important;
+    }
+
+    .fc-timegrid-slot {
+        min-height: 50px !important;
+    }
+
+    /* Modal full screen on very small devices */
+    .modal-dialog {
+        margin: 0;
+        max-width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    .modal-content {
+        border-radius: 0;
+        height: 100%;
+        max-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-body {
+        flex: 1;
+        overflow-y: auto;
+        max-height: calc(100vh - 120px);
+    }
+
+    /* Form inputs */
+    .form-select,
+    .form-control {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+
+    /* Buttons */
+    .btn {
+        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+    }
+
+    .btn-sm {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    /* Cards */
+    .card-body {
+        padding: 0.75rem;
+    }
+
+    /* Spacing */
+    .mb-3,
+    .mb-4 {
+        margin-bottom: 1rem !important;
+    }
+
+    .row {
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
+    }
+
+    .row > * {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    /* Title */
+    h1.h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+        padding: 1rem;
+    }
+
+    .spinner-border {
+        width: 2rem;
+        height: 2rem;
+    }
+}
+
+@media (max-width: 400px) {
+    /* Very small devices */
+    .fc-button {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.3rem;
+        min-width: calc(50% - 0.2rem);
+    }
+
+    .fc-toolbar-title {
+        font-size: 0.9rem;
+    }
+
+    .fc-daygrid-event {
+        font-size: 0.7rem !important;
+        padding: 2px 3px !important;
+    }
+
+    .fc-event-title {
+        font-size: 0.7rem !important;
+    }
+}
+
+/* Filter Section */
+.card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Dropdown Styles */
+.dropdown-menu {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem 0;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #066ac9;
+}
+
+/* Export Dropdown Menu - Ensure it appears above other elements */
+#exportBtn + .dropdown-menu,
+.btn-group .dropdown-menu,
+.dropdown-menu[aria-labelledby="exportBtn"],
+.dropdown-menu[aria-labelledby="exportBtn"] {
+    z-index: 999999 !important;
+    position: absolute !important;
+    overflow: visible !important;
+    transform: translateZ(0) !important; /* Force hardware acceleration */
+}
+
+/* Ensure export button group has high z-index */
+.btn-group[role="group"]:has(#exportBtn),
+.col-md-3:has(#exportBtn) {
+    position: relative !important;
+    z-index: 999998 !important;
+}
+
+/* Ensure the filter card with export button has proper stacking */
+.row.mb-3:has(#exportBtn),
+.row.mb-3:has(#exportBtn) .card,
+.row.mb-3:has(#exportBtn) .card-body {
+    position: relative !important;
+    z-index: 999997 !important;
+    overflow: visible !important;
+}
+
+/* Ensure the filter card doesn't clip the dropdown */
+.row.mb-3 .card.shadow-sm {
+    overflow: visible !important;
+}
+
+.row.mb-3 .card.shadow-sm .card-body {
+    overflow: visible !important;
+    position: relative;
+}
+
+/* Ensure the btn-group container allows overflow and creates stacking context */
+.btn-group.w-100 {
+    position: relative !important;
+    overflow: visible !important;
+    z-index: 999998 !important;
+    height: auto !important;
+    min-height: auto !important;
+    margin-bottom: 0 !important;
+    isolation: isolate !important; /* Create new stacking context */
+}
+
+/* Ensure parent containers allow dropdown overflow */
+.row.mb-3:has(#exportBtn) {
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 999997 !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.row.mb-3 {
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 1 !important;
+    margin-bottom: 1.5rem !important;
+}
+
+/* Ensure filter card has proper spacing */
+.row.mb-3 .card.shadow-sm {
+    overflow: visible !important;
+    margin-bottom: 0;
+}
+
+.row.mb-3 .card.shadow-sm .card-body {
+    overflow: visible !important;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+/* Ensure export button doesn't overlap */
+#exportBtn {
+    position: relative !important;
+    z-index: 999999 !important;
+}
+
+/* Export dropdown should appear above everything with proper spacing */
+#exportBtn + .dropdown-menu,
+.btn-group .dropdown-menu,
+.dropdown-menu[aria-labelledby="exportBtn"] {
+    z-index: 999999 !important;
+    position: absolute !important;
+    overflow: visible !important;
+    margin-top: 0.25rem !important;
+    transform: translateZ(0) !important; /* Force hardware acceleration */
+}
+
+/* Ensure bulk adjustment section has lower z-index */
+.card.border-warning,
+.card.border-warning .card-body,
+.card.border-warning .card-header,
+.row.mb-3 .card.border-warning {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Ensure all cards below export section have lower z-index */
+.row.mb-3:not(:has(#exportBtn)) {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.row.mb-3:not(:has(#exportBtn)) .card {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Specifically target the bulk hour adjustment row */
+.row.mb-3:has(.card.border-warning) {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.row.mb-3:has(.card.border-warning) .card {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Ensure calendar section has lower z-index */
+.card.shadow-sm:has(#calendar),
+.card.shadow-sm:has(.card-body:has(#calendar)) {
+    position: relative;
+    z-index: 1 !important;
+    overflow: visible;
+}
+
+/* Calendar container should not interfere with dropdown */
+#calendar {
+    position: relative;
+    z-index: 1 !important;
+}
+
+/* FullCalendar elements should have lower z-index */
+.fc,
+.fc-scroller,
+.fc-scroller-liquid-absolute,
+.fc-daygrid,
+.fc-timegrid {
+    position: relative;
+    z-index: 1 !important;
+}
+
+/* Calendar row should have proper spacing */
+.row:has(#calendar),
+.row:has(.card:has(#calendar)) {
+    margin-top: 0 !important;
+    position: relative;
+    z-index: 1 !important;
+}
+
+/* Ensure page wrapper doesn't clip dropdown */
+.page-content-wrapper {
+    overflow: visible !important;
+    position: relative !important;
+}
+
+/* Ensure parent containers don't create clipping */
+.page-content-wrapper .row,
+.page-content-wrapper .col-12 {
+    overflow: visible !important;
+}
+
+/* Calendar Event Colors */
+.fc-event {
+    opacity: 0.9;
+}
+
+.fc-event:hover {
+    opacity: 1;
+}
+
+/* Print Styles */
+@media print {
+    .fc-toolbar,
+    .btn,
+    .modal {
+        display: none !important;
+    }
+
+    .fc {
+        max-width: 100%;
+    }
+}
+
+/* Custom Scrollbar */
+.fc-scroller::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.fc-scroller::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb {
+    background: #066ac9;
+    border-radius: 4px;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb:hover {
+    background: #055a9e;
+}
+

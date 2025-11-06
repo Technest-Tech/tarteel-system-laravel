@@ -41,6 +41,14 @@
                             <div class="form-group">
                                 <input type="email" name="email" class="form-control" id="exampleInputEmail1" value="{{$teacher->email}}" aria-describedby="emailHelp" placeholder="ادخل الايميل">
                             </div> <br>
+                            <div class="form-group">
+                                <label for="salaryArabic" class="form-label">راتب العربي</label>
+                                <input type="text" inputmode="decimal" pattern="[0-9]*\.?[0-9]*" name="salary_arabic" class="form-control" id="salaryArabic" value="{{$teacher->salary_arabic ?? ''}}" placeholder="سعر الساعة للطلاب العرب" autocomplete="off">
+                            </div> <br>
+                            <div class="form-group">
+                                <label for="salaryEnglish" class="form-label">راتب الإنجليزي</label>
+                                <input type="text" inputmode="decimal" pattern="[0-9]*\.?[0-9]*" name="salary_english" class="form-control" id="salaryEnglish" value="{{$teacher->salary_english ?? ''}}" placeholder="سعر الساعة للطلاب الإنجليز" autocomplete="off">
+                            </div> <br>
 
                             <button type="submit" class="btn btn-primary"> تعديل</button>
                         </form>

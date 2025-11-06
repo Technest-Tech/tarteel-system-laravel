@@ -20,14 +20,32 @@
 
         <hr>
         <div class="row justify-content-center" style="direction: rtl">
-            @foreach($courses as $course)
+           @foreach($courses as $course)
                 <div class="col-md-2 p-2">
                     <div class="card shadow-lg border-0 rounded-lg">
                         <div class="card-body">
                             <h5 class="card-title">{{$course->course_name}}</h5>
-                            <p class="card-text">{{$course->student->user_name}}</p>
+                            <p class="card-text">{{$course->student ? $course->student->user_name : 'No student assigned'}}</p>
                             <a href="{{route('teacher.course.lessons',['month'=>1,'course_id'=>$course->id])}}" class="btn btn-primary">دروس هذه الدورة</a>
-                            <a href="#" class="btn btn-danger deleteButton" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal" data-url="{{route('delete.teacher.course',$course->id)}}">حذف !!!!!</a>
+                            <a href="javascript:void(0);" class="btn btn-danger deleteButton" onclick="confirmDelete('{{route('delete.teacher.course',$course->id)}}')">حذف !!!!!</a>
+                            <script>
+                                function confirmDelete(url) {
+                                    Swal.fire({
+                                        title: 'هل أنت متأكد؟',
+                                        text: "أنت على وشك حذف الدورة!",
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonColor: '#3085d6',
+                                        cancelButtonColor: '#d33',
+                                        confirmButtonText: 'نعم، احذفه!',
+                                        cancelButtonText: 'إلغاء'
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            window.location.href = url;
+                                        }
+                                    })
+                                }
+                            </script>
                         </div>
                     </div>
                 </div>

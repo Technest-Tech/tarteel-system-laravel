@@ -67,8 +67,31 @@
                                   </a>
                                   <!-- dropdown button -->
                                   <ul class="dropdown-menu dropdown-w-sm dropdown-menu-end min-w-auto shadow rounded" aria-labelledby="dropdownShare2">
-                                      <a class="dropdown-item" href="#" onclick="openEditModal('{{ $student->id }}', '{{ $student->user_name }}', '{{ $student->whatsapp_number }}', '{{ $student->hour_price }}', '{{ $student->currency }}')"><i class="bi bi-pencil-square fa-fw me-2"></i>تعديل</a>
-                                      <li><a class="dropdown-item" href="{{route('students.delete',$student->id)}}"><i class="bi bi-trash fa-fw me-2"></i>حذف</a></li>
+                                      <a class="dropdown-item" href="#" onclick="openEditModal('{{ $student->id }}', '{{ $student->user_name }}', '{{ $student->whatsapp_number }}', '{{ $student->hour_price }}', '{{ $student->currency }}', '{{ $student->student_type ?? 'arabic' }}', '{{ $student->timezone ?? 'Africa/Cairo' }}')"><i class="bi bi-pencil-square fa-fw me-2"></i>تعديل</a>
+                                      <li>
+                                          <a class="dropdown-item" href="javascript:void(0);" onclick="confirmDelete('{{route('students.delete',$student->id)}}')">
+                                              <i class="bi bi-trash fa-fw me-2"></i>حذف
+                                          </a>
+                                      </li>
+
+                                      <script>
+                                          function confirmDelete(url) {
+                                              Swal.fire({
+                                                  title: 'هل أنت متأكد؟',
+                                                  text: "أنت على وشك حذف الطالب!",
+                                                  icon: 'warning',
+                                                  showCancelButton: true,
+                                                  confirmButtonColor: '#3085d6',
+                                                  cancelButtonColor: '#d33',
+                                                  confirmButtonText: 'نعم، احذفه!',
+                                                  cancelButtonText: 'إلغاء'
+                                              }).then((result) => {
+                                                  if (result.isConfirmed) {
+                                                      window.location.href = url;
+                                                  }
+                                              })
+                                          }
+                                      </script>
                                   </ul>
                               </div>
                           </div><br>
@@ -138,6 +161,23 @@
                             </select>
                         </div>
 
+                        <div class="mb-3">
+                            <label for="studentType" class="form-label">نوع الطالب</label>
+                            <select class="form-select" id="studentType" name="student_type" required>
+                                <option value="arabic">عربي</option>
+                                <option value="english">إنجليزي</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="studentTimezone" class="form-label">المنطقة الزمنية</label>
+                            <select class="form-select" id="studentTimezone" name="timezone" required>
+                                @foreach(\App\Services\TimezoneService::getTimezoneOptions() as $tzValue => $tzLabel)
+                                    <option value="{{ $tzValue }}" {{ $tzValue == 'Africa/Cairo' ? 'selected' : '' }}>{{ $tzLabel }}</option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">سيتم تعديل جميع مواعيد الحصص تلقائياً عند تغيير المنطقة الزمنية</small>
+                        </div>
 
                         <!-- Add more fields as necessary -->
                         <button type="submit" class="btn btn-primary">اضافة</button>
@@ -179,6 +219,22 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <label for="studentType2" class="form-label">نوع الطالب</label>
+                            <select class="form-select" id="studentType2" name="student_type" required>
+                                <option value="arabic">عربي</option>
+                                <option value="english">إنجليزي</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="studentTimezone2" class="form-label">المنطقة الزمنية</label>
+                            <select class="form-select" id="studentTimezone2" name="timezone" required>
+                                @foreach(\App\Services\TimezoneService::getTimezoneOptions() as $tzValue => $tzLabel)
+                                    <option value="{{ $tzValue }}">{{ $tzLabel }}</option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">سيتم تعديل جميع مواعيد الحصص تلقائياً عند تغيير المنطقة الزمنية</small>
+                        </div>
                         <button type="submit" class="btn btn-primary">تحديث</button>
                     </form>
                 </div>
@@ -200,7 +256,7 @@
             });
         });
 
-        function openEditModal(id, userName, whatsappNumber, hourPrice, currency) {
+        function openEditModal(id, userName, whatsappNumber, hourPrice, currency, studentType, timezone) {
             console.log(userName, whatsappNumber);
             // Update form action with the student id
             document.getElementById('editStudentForm').action = 'student/update/' + id;
@@ -210,6 +266,8 @@
             document.getElementById('whatsappNumber2').value = whatsappNumber;
             document.getElementById('studentHourPrice').value = hourPrice;
             document.getElementById('studentCurrency').value = currency;
+            document.getElementById('studentType2').value = studentType || 'arabic';
+            document.getElementById('studentTimezone2').value = timezone || 'Africa/Cairo';
 
             // Show the modal
             var editStudentModal = new bootstrap.Modal(document.getElementById('editStudentModal'));

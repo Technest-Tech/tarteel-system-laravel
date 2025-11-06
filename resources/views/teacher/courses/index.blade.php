@@ -25,12 +25,12 @@
                     <div class="card shadow-lg border-0 rounded-lg">
                         <div class="card-body">
                             <h5 class="card-title">{{$course->course_name}}</h5>
-                            <p class="card-text">{{$course->student->user_name}}</p>
+                            <p class="card-text">{{ $course->student ? $course->student->user_name : 'No student assigned' }}</p>
                             <a href="{{route('course.lessons',['month'=>1,'course_id'=>$course->id])}}" class="btn btn-primary">دروس هذه الدورة</a>
                         </div>
                     </div>
                 </div>
-            @endforeach
+          @endforeach
         </div>
 
 

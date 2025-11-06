@@ -31,6 +31,8 @@ class TeachersController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|confirmed',
             'students' => 'required|array',
+            'salary_arabic' => 'nullable|numeric',
+            'salary_english' => 'nullable|numeric',
         ]);
 
         $data['user_type'] = User::USER_TYPE['teacher'];
@@ -62,9 +64,16 @@ class TeachersController extends Controller
         $data = $request->validate([
             'user_name' => 'required',
             'email' => 'required|email',
+            'salary_arabic' => 'nullable|numeric',
+            'salary_english' => 'nullable|numeric',
         ]);
         $user = User::find($id);
-        $user->update(['user_name' => $data['user_name'], 'email' => $data['email']]);
+        $user->update([
+            'user_name' => $data['user_name'],
+            'email' => $data['email'],
+            'salary_arabic' => $data['salary_arabic'] ?? null,
+            'salary_english' => $data['salary_english'] ?? null,
+        ]);
         return redirect()->route('teachers.index');
     }
 
@@ -130,6 +139,7 @@ class TeachersController extends Controller
     {
         $lessons = \App\Models\Lessons::where('course_id', $course_id)
             ->whereMonth('created_at', $month)
+            ->whereYear('created_at', now()->year)
             ->get();
         return view('admin.teachers.lessons', compact('lessons','month','course_id'));
     }

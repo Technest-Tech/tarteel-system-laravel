@@ -17,6 +17,7 @@ class User extends Authenticatable
         'admin' => 'admin',
         'student' => 'student',
         'teacher' => 'teacher',
+        'support' => 'support',
     ];
     //hard coded currency
     const CURRENCY = [
@@ -27,7 +28,18 @@ class User extends Authenticatable
         'cad' => 'CAD',
     ];
 
-   protected $fillable = ['user_name', 'email', 'password','user_type','whatsapp_number','hour_price','currency'];
+    //hard coded student type
+    const STUDENT_TYPE = [
+        'arabic' => 'arabic',
+        'english' => 'english',
+    ];
+
+   protected $fillable = ['user_name', 'email', 'password','user_type','whatsapp_number','hour_price','currency','family_id','student_type','salary_arabic','salary_english','timezone'];
+
+    public function family()
+    {
+        return $this->belongsTo(Family::class, 'family_id');
+    }
     protected $hidden = [
         'password',
         'remember_token',

@@ -75,14 +75,38 @@
                               </div>
 
                               <!-- Edit dropdown -->
-                              <div class="dropdown text-end">
+                               <!-- Edit dropdown -->
+                              <div class="dropdown text-end" style="margin-bottom: 70px">
                                   <a href="#" class="btn btn-sm btn-light btn-round small mb-0" role="button" id="dropdownShare2" data-bs-toggle="dropdown" aria-expanded="false">
                                       <i class="bi bi-three-dots fa-fw"></i>
                                   </a>
                                   <!-- dropdown button -->
                                   <ul class="dropdown-menu dropdown-w-sm dropdown-menu-end min-w-auto shadow rounded" aria-labelledby="dropdownShare2">
                                       <a class="dropdown-item" href="{{route('teachers.edit',$teacher->id)}}" ><i class="bi bi-pencil-square fa-fw me-2"></i>تعديل</a>
-                                      <li><a class="dropdown-item" href="{{route('teachers.delete',$teacher->id)}}"><i class="bi bi-trash fa-fw me-2"></i>حذف</a></li>
+                                      <li>
+                                          <a class="dropdown-item" href="javascript:void(0);" onclick="confirmDelete('{{route('teachers.delete',$teacher->id)}}')">
+                                              <i class="bi bi-trash fa-fw me-2"></i>حذف
+                                          </a>
+                                      </li>
+
+                                      <script>
+                                          function confirmDelete(url) {
+                                              Swal.fire({
+                                                  title: 'هل أنت متأكد؟',
+                                                  text: "أنت على وشك حذف المعلم!",
+                                                  icon: 'warning',
+                                                  showCancelButton: true,
+                                                  confirmButtonColor: '#3085d6',
+                                                  cancelButtonColor: '#d33',
+                                                  confirmButtonText: 'نعم، احذفه!',
+                                                  cancelButtonText: 'إلغاء'
+                                              }).then((result) => {
+                                                  if (result.isConfirmed) {
+                                                      window.location.href = url;
+                                                  }
+                                              })
+                                          }
+                                      </script>
                                       <li><a class="dropdown-item" href="{{route('teacher.courses',$teacher->id)}}"><i class="bi bi-laptop fa-fw me-2"></i>دورات المعلم</a></li>
                                   </ul>
                               </div>
@@ -133,6 +157,14 @@
                                     <option value="{{ $student->id }}">{{ $student->user_name }}</option>
                                 @endforeach
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="salaryArabic" class="form-label">راتب العربي (سعر الساعة)</label>
+                            <input type="number" step="0.01" class="form-control" id="salaryArabic" name="salary_arabic" placeholder="سعر الساعة للطلاب العرب">
+                        </div>
+                        <div class="mb-3">
+                            <label for="salaryEnglish" class="form-label">راتب الإنجليزي (سعر الساعة)</label>
+                            <input type="number" step="0.01" class="form-control" id="salaryEnglish" name="salary_english" placeholder="سعر الساعة للطلاب الإنجليز">
                         </div>
                         <button type="submit" class="btn btn-primary">اضافة</button>
                     </form>
