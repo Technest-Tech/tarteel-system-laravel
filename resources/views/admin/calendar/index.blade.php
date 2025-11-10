@@ -6,9 +6,6 @@
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h1 class="h3 mb-2 mb-sm-0 text-end">تقويم الحصص</h1>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createLessonModal">
-                <i class="fas fa-plus me-2"></i>إضافة  جدول طالب
-            </button>
         </div>
     </div>
 
@@ -35,7 +32,7 @@
                     <div class="row g-3 align-items-end">
                         <div class="col-md-3">
                             <label for="filter_student" class="form-label small">الطالب</label>
-                            <select class="form-select form-select-sm" id="filter_student">
+                            <select class="form-select form-select-sm js-searchable" id="filter_student">
                                 <option value="">جميع الطلاب</option>
                                 @foreach($students as $student)
                                     <option value="{{ $student->id }}">{{ $student->user_name }}</option>
@@ -44,7 +41,7 @@
                         </div>
                         <div class="col-md-3">
                             <label for="filter_teacher" class="form-label small">المعلم</label>
-                            <select class="form-select form-select-sm" id="filter_teacher">
+                            <select class="form-select form-select-sm js-searchable" id="filter_teacher">
                                 <option value="">جميع المعلمين</option>
                                 @foreach($teachers as $teacher)
                                     <option value="{{ $teacher->id }}">{{ $teacher->user_name }}</option>
@@ -80,10 +77,14 @@
     <div class="row mb-3">
         <div class="col-12">
             <div class="card shadow-sm border-warning">
-                <div class="card-header bg-warning text-dark">
+                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
                     <h6 class="mb-0"><i class="fas fa-clock me-2"></i>تعديل المواعيد بسبب تغيير التوقيت (التوقيت الصيفي/الشتوي)</h6>
+                    <button class="btn btn-sm btn-outline-dark" type="button" data-bs-toggle="collapse" data-bs-target="#bulkHourAdjustCollapse" aria-expanded="false" aria-controls="bulkHourAdjustCollapse">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
                 </div>
-                <div class="card-body">
+                <div id="bulkHourAdjustCollapse" class="collapse">
+                    <div class="card-body">
                     <form id="bulkHourAdjustForm">
                         @csrf
                         <div class="row g-3 align-items-end">
@@ -128,6 +129,7 @@
                             </div>
                         </div>
                     </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -135,7 +137,29 @@
 
     <!-- Calendar -->
     <div class="row">
-        <div class="col-12">
+        <div class="col-lg-3 mb-3 mb-lg-0">
+            <div class="card shadow-sm h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0"><i class="fas fa-chalkboard-teacher me-2"></i>قائمة المعلمين</h6>
+                    <button class="btn btn-sm btn-outline-secondary" id="resetTeacherFilter">
+                        إعادة تعيين
+                    </button>
+                </div>
+                <div class="card-body p-0 teacher-list-container">
+                    <div class="list-group list-group-flush teacher-list-scroll" id="calendarTeacherList">
+                        <button type="button" class="list-group-item list-group-item-action active" data-teacher-id="">
+                            جميع المعلمين
+                        </button>
+                        @foreach($teachers as $teacher)
+                            <button type="button" class="list-group-item list-group-item-action" data-teacher-id="{{ $teacher->id }}">
+                                {{ $teacher->user_name }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-9">
             <div class="card shadow-sm">
                 <div class="card-body">
                     <div id="calendar"></div>
@@ -297,7 +321,7 @@
                     
                     <div class="mb-3">
                         <label for="edit_student_id" class="form-label">الطالب</label>
-                        <select class="form-select" id="edit_student_id" name="student_id" required>
+                        <select class="form-select js-searchable" id="edit_student_id" name="student_id" required>
                             @foreach($students as $student)
                                 <option value="{{ $student->id }}">{{ $student->user_name }}</option>
                             @endforeach
@@ -306,7 +330,7 @@
 
                     <div class="mb-3">
                         <label for="edit_teacher_id" class="form-label">المعلم</label>
-                        <select class="form-select" id="edit_teacher_id" name="teacher_id" required>
+                        <select class="form-select js-searchable" id="edit_teacher_id" name="teacher_id" required>
                             @foreach($teachers as $teacher)
                                 <option value="{{ $teacher->id }}">{{ $teacher->user_name }}</option>
                             @endforeach
@@ -387,8 +411,96 @@
     </div>
 </div>
 
+<!-- Create Single Event Modal -->
+<div class="modal fade" id="singleEventModal" tabindex="-1" aria-labelledby="singleEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="singleEventModalLabel">إضافة حصة في هذا اليوم</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="singleEventForm">
+                    @csrf
+                    <input type="hidden" id="single_event_date" name="event_date">
+                    <div class="mb-3">
+                        <label for="single_event_student" class="form-label">الطالب</label>
+                        <select class="form-select js-searchable" id="single_event_student" name="student_id" required>
+                            <option value="" disabled selected>اختر الطالب</option>
+                            @foreach($students as $student)
+                                <option value="{{ $student->id }}">{{ $student->user_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="single_event_teacher" class="form-label">المعلم</label>
+                        <select class="form-select js-searchable" id="single_event_teacher" name="teacher_id" required>
+                            <option value="" disabled selected>اختر المعلم</option>
+                            @foreach($teachers as $teacher)
+                                <option value="{{ $teacher->id }}">{{ $teacher->user_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="single_event_start_time" class="form-label">وقت البداية</label>
+                            <input type="time" class="form-control" id="single_event_start_time" name="start_time" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="single_event_end_time" class="form-label">وقت النهاية</label>
+                            <input type="time" class="form-control" id="single_event_end_time" name="end_time" required>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label for="single_event_lesson_name" class="form-label">اسم الحصة</label>
+                        <input type="text" class="form-control" id="single_event_lesson_name" name="lesson_name" placeholder="مثال: حصة مراجعة" maxlength="255">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="saveSingleEventBtn">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    حفظ الحصة
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Event Options Modal -->
+<div class="modal fade" id="deleteEventModal" tabindex="-1" aria-labelledby="deleteEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteEventModalLabel">حذف الحصة</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="delete_event_scope" class="form-label">اختر نطاق الحذف</label>
+                    <select class="form-select" id="delete_event_scope">
+                        <option value="single">هذه الحصة فقط</option>
+                        <option value="future">هذه الحصة وما يليها</option>
+                        <option value="series">جميع حصص هذا الجدول</option>
+                    </select>
+                </div>
+                <p class="mb-0 text-muted" id="delete_event_description"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteEventBtn">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    تأكيد الحذف
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('styles')
 <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
 <link rel="stylesheet" href="{{ asset('assets/css/calendar-custom.css') }}">
 @endpush
 
@@ -400,12 +512,14 @@
         store: '{{ route("admin.calendar.store") }}',
         show: '{{ route("admin.calendar.show", ":id") }}',
         update: '{{ route("admin.calendar.update", ":id") }}',
-        delete: '{{ route("admin.calendar.delete", ":id") }}',
+        deleteRedirect: '{{ route("admin.calendar.delete", ":id") }}',
+        destroy: '{{ route("admin.calendar.destroy") }}',
         export: '{{ route("admin.calendar.export") }}'
     };
     window.csrfToken = '{{ csrf_token() }}';
 </script>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js' onload="console.log('FullCalendar loaded');"></script>
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js" defer></script>
 <script>
     console.log('About to load calendar-admin.js...');
     console.log('Script URL:', '{{ asset('js/calendar-admin.js') }}');

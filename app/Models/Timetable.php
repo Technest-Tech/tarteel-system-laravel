@@ -12,6 +12,7 @@ class Timetable extends Model
     protected $table = 'timetable';
     
     protected $fillable = [
+        'series_id',
         'student_id',
         'teacher_id',
         'day',
@@ -20,6 +21,7 @@ class Timetable extends Model
         'start_date',
         'end_date',
         'lesson_name',
+        'color',
         'notification_minutes',
         'notification_sent',
     ];

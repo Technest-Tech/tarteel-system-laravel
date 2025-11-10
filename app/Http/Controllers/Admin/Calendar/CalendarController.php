@@ -8,6 +8,8 @@ use App\Models\Lessons;
 use App\Models\User;
 use App\Models\Courses;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Mpdf\Mpdf;
 
@@ -127,11 +129,22 @@ class CalendarController extends Controller
                 $duration = round($totalMinutes / 60, 2);
 
                 // Set time on the event date
-                $startDateTime = $eventDate->copy()->setTime($startHour, $startMinute, 0)->format('Y-m-d\TH:i:s');
-                $endDateTime = $eventDate->copy()->setTime($endHour, $endMinute, 0)->format('Y-m-d\TH:i:s');
+                $startDateTimeObj = $eventDate->copy()->setTime($startHour, $startMinute, 0);
+                $endDateTimeObj = $eventDate->copy()->setTime($endHour, $endMinute, 0);
+
+                if ($endTimeMinutes <= $startTimeMinutes) {
+                    $endDateTimeObj->addDay();
+                }
+
+                $startDateTime = $startDateTimeObj->format('Y-m-d\TH:i:s');
+                $endDateTime = $endDateTimeObj->format('Y-m-d\TH:i:s');
+
+                $eventDateStr = $eventDate->format('Y-m-d');
+                $seriesId = $entry->series_id;
+                $color = $entry->color ?: $this->getEventColor($entry->student_id);
 
                 $events[] = [
-                    'id' => 't_' . $entry->id,
+                    'id' => 't_' . $entry->id . '_' . $eventDateStr,
                     'timetable_id' => $entry->id,
                     'title' => $entry->student->user_name ?? 'Student',
                     'start' => $startDateTime,
@@ -140,13 +153,17 @@ class CalendarController extends Controller
                     'teacher' => $entry->teacher->user_name ?? 'N/A',
                     'lesson_name' => $entry->lesson_name ?? 'Lesson',
                     'duration' => $duration,
-                    'color' => $this->getEventColor($entry->student_id),
+                    'color' => $color,
+                    'backgroundColor' => $color,
+                    'borderColor' => $color,
                     'extendedProps' => [
                         'student_id' => $entry->student_id,
                         'teacher_id' => $entry->teacher_id,
                         'lesson_name' => $entry->lesson_name,
                         'timetable_id' => $entry->id,
-                        'date' => $eventDate->format('Y-m-d'),
+                        'series_id' => $seriesId,
+                        'date' => $eventDateStr,
+                        'color' => $color,
                     ]
                 ];
             }
@@ -176,6 +193,10 @@ class CalendarController extends Controller
             'schedule_entries.*.day' => 'required|integer|between:0,6',
             'schedule_entries.*.lesson_name' => 'nullable|string',
             'timezone' => 'nullable|string',
+            'color' => 'nullable|string|max:32',
+            'series_id' => 'nullable|string|max:64',
+            'schedule_entries.*.series_id' => 'nullable|string|max:64',
+            'schedule_entries.*.color' => 'nullable|string|max:32',
         ]);
 
         // Validate end_time is after start_time for each entry
@@ -192,22 +213,24 @@ class CalendarController extends Controller
         $start = Carbon::createFromFormat('Y-m-d', $request->start_date)->startOfDay();
         $end = Carbon::createFromFormat('Y-m-d', $request->end_date)->endOfDay();
 
-        // Get timezone from request or default to Cairo
-        $formTimezone = $request->input('timezone', 'Africa/Cairo');
-        
         // Process each schedule entry and create individual timetable records for each matching date
         foreach ($request->schedule_entries as $entry) {
-            // Get student to check their timezone
-            $student = User::find($entry['student_id']);
-            $studentTimezone = $student->timezone ?? 'Africa/Cairo';
-            
-            // Convert times from form timezone to student's timezone if different
-            $startTime = $entry['start_time'];
-            $endTime = $entry['end_time'];
-            
-            if ($formTimezone !== $studentTimezone) {
-                $startTime = \App\Services\TimezoneService::convertTime($entry['start_time'], $formTimezone, $studentTimezone);
-                $endTime = \App\Services\TimezoneService::convertTime($entry['end_time'], $formTimezone, $studentTimezone);
+            // Times are saved as-is (Egypt time), regardless of selected timezone
+            // The timezone field is stored for reference only and does not affect the saved times
+            $startTime = Carbon::createFromFormat('H:i', $entry['start_time'])->format('H:i:s');
+            $endTime = Carbon::createFromFormat('H:i', $entry['end_time'])->format('H:i:s');
+
+            if ($startTime === $endTime) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'وقت النهاية يجب أن يختلف عن وقت البداية'
+                ], 422);
+            }
+
+            $seriesId = $entry['series_id'] ?? $request->input('series_id') ?? (string) Str::uuid();
+            $color = $entry['color'] ?? $request->input('color');
+            if (!$color) {
+                $color = $this->getEventColor($entry['student_id']);
             }
             
             // Loop through all dates from start_date to end_date
@@ -217,6 +240,7 @@ class CalendarController extends Controller
                 if ($currentDate->dayOfWeek == $entry['day']) {
                     // Create a separate timetable record for this specific date
                     $timetableEntry = Timetable::create([
+                        'series_id' => $seriesId,
                         'student_id' => $entry['student_id'],
                         'teacher_id' => $entry['teacher_id'],
                         'day' => $entry['day'],
@@ -225,6 +249,7 @@ class CalendarController extends Controller
                         'start_date' => $currentDate->format('Y-m-d'), // The specific occurrence date
                         'end_date' => $currentDate->format('Y-m-d'), // Same date for individual occurrence
                         'lesson_name' => $entry['lesson_name'] ?? 'Lesson',
+                        'color' => $color,
                         'notification_minutes' => isset($entry['notification_minutes']) ? (int)$entry['notification_minutes'] : 30,
                         'notification_sent' => false,
                     ]);
@@ -259,10 +284,10 @@ class CalendarController extends Controller
         ]);
 
         // Validate end_time is after start_time
-        if ($request->start_time >= $request->end_time) {
+        if ($request->start_time === $request->end_time) {
             return response()->json([
                 'success' => false,
-                'message' => 'وقت النهاية يجب أن يكون بعد وقت البداية'
+                'message' => 'وقت النهاية يجب أن يختلف عن وقت البداية'
             ], 422);
         }
 
@@ -303,72 +328,164 @@ class CalendarController extends Controller
     /**
      * Delete a timetable entry or single day lesson
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id = null)
+    {
+        if ($request->isMethod('delete') || $request->expectsJson()) {
+            return $this->destroyViaApi($request);
+        }
+
+        $identifier = $id ?? $request->route('id');
+
+        try {
+            $result = $this->executeDeletion([
+                'scope' => 'single',
+                'event_id' => $identifier,
+            ]);
+
+            return redirect()
+                ->route('admin.calendar.index')
+                ->with('success', $result['message']);
+        } catch (\InvalidArgumentException $e) {
+            return redirect()
+                ->route('admin.calendar.index')
+                ->with('error', $e->getMessage());
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()
+                ->route('admin.calendar.index')
+                ->with('error', 'لم يتم العثور على الحصة أو الجدول المطلوب');
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('admin.calendar.index')
+                ->with('error', 'حدث خطأ أثناء حذف الحصة: ' . $e->getMessage());
+        }
+    }
+
+    protected function destroyViaApi(Request $request)
     {
         try {
-            // Handle event ID format: t_{timetable_id}_{date} - delete lesson for that specific date
-            if (strpos($id, 't_') === 0) {
-                $parts = explode('_', $id);
-                if (count($parts) >= 3) {
-                    $eventDate = $parts[2];
-                    $timetableId = $parts[1];
-                    // Find timetable to get student and teacher for finding the correct lesson
-                    $timetable = Timetable::findOrFail($timetableId);
-                    // Find and delete lesson for this specific date, student, and teacher
-                    $lesson = Lessons::whereDate('lesson_date', $eventDate)
-                        ->where('student_id', $timetable->student_id)
-                        ->where('teacher_id', $timetable->teacher_id)
-                        ->first();
-                    if ($lesson) {
-                        $lesson->delete();
-                        return redirect()->route('admin.calendar.index')->with('success', 'تم حذف الحصة لهذا اليوم بنجاح');
-                    }
-                    // If no lesson found, return success (might be a timetable-only event)
-                    return redirect()->route('admin.calendar.index')->with('success', 'تم حذف الحصة لهذا اليوم بنجاح');
-                }
-            }
-            
-            // Handle lesson ID format: l_{lesson_id}
-            if (strpos($id, 'l_') === 0) {
-                $parts = explode('_', $id);
-                if (count($parts) >= 2) {
-                    $lessonId = $parts[1];
-                    $lesson = Lessons::findOrFail($lessonId);
-                    $lesson->delete();
-                    return redirect()->route('admin.calendar.index')->with('success', 'تم حذف الحصة بنجاح');
-                }
-            }
-            
-            // If it's a plain numeric ID, check if it's a lesson first, then timetable
-            if (is_numeric($id)) {
-                // Try to find as lesson first
-                $lesson = Lessons::find($id);
-                if ($lesson) {
-                    $lesson->delete();
-                    return redirect()->route('admin.calendar.index')->with('success', 'تم حذف الحصة بنجاح');
-                }
-                
-                // If not found as lesson, try as timetable
-                $timetable = Timetable::find($id);
-                if ($timetable) {
-                    $timetable->delete();
-                    return redirect()->route('admin.calendar.index')->with('success', 'تم حذف الجدول بنجاح');
-                }
-                
-                // If neither found, return error
-                return redirect()->route('admin.calendar.index')->with('error', 'لم يتم العثور على الحصة أو الجدول المطلوب');
-            }
-            
-            // Default: try to delete as timetable entry
-            $timetable = Timetable::findOrFail($id);
-            $timetable->delete();
+            $data = $request->validate([
+                'scope' => 'nullable|in:single,future,series',
+                'timetable_id' => 'nullable|integer|exists:timetable,id',
+                'event_id' => 'nullable|string',
+                'event_date' => 'nullable|date',
+                'series_id' => 'nullable|string|max:64',
+            ]);
 
-            return redirect()->route('admin.calendar.index')->with('success', 'تم حذف الجدول بنجاح');
+            $result = $this->executeDeletion($data);
+
+            return response()->json([
+                'success' => true,
+                'message' => $result['message'],
+                'entries_deleted' => $result['entries_deleted'],
+                'lessons_deleted' => $result['lessons_deleted'],
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return redirect()->route('admin.calendar.index')->with('error', 'لم يتم العثور على الحصة أو الجدول المطلوب');
-        } catch (\Exception $e) {
-            return redirect()->route('admin.calendar.index')->with('error', 'حدث خطأ أثناء حذف الحصة: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'لم يتم العثور على الحصة أو الجدول المطلوب',
+            ], 404);
+        } catch (\Throwable $e) {
+            \Log::error('Calendar delete error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء حذف الحصة.',
+            ], 500);
         }
+    }
+
+    protected function executeDeletion(array $payload): array
+    {
+        $scope = $payload['scope'] ?? 'single';
+        $eventId = $payload['event_id'] ?? null;
+        $timetableId = $payload['timetable_id'] ?? null;
+        $eventDate = $payload['event_date'] ?? null;
+        $seriesId = $payload['series_id'] ?? null;
+
+        if (!$timetableId && $eventId) {
+            if (str_starts_with($eventId, 't_')) {
+                $parts = explode('_', $eventId);
+                if (isset($parts[1])) {
+                    $timetableId = (int) $parts[1];
+                }
+                if (!$eventDate && isset($parts[2])) {
+                    $eventDate = $parts[2];
+                }
+            } elseif (str_starts_with($eventId, 'l_')) {
+                $lessonId = (int) substr($eventId, 2);
+                $lesson = Lessons::findOrFail($lessonId);
+                $lesson->delete();
+                return [
+                    'message' => __('تم حذف الحصة بنجاح'),
+                    'entries_deleted' => 0,
+                    'lessons_deleted' => 1,
+                ];
+            } elseif (is_numeric($eventId)) {
+                $timetableId = (int) $eventId;
+            }
+        }
+
+        $timetable = null;
+        if ($timetableId) {
+            $timetable = Timetable::findOrFail($timetableId);
+            $seriesId = $seriesId ?? $timetable->series_id;
+            $eventDate = $eventDate ?? ($timetable->start_date ? Carbon::parse($timetable->start_date)->format('Y-m-d') : null);
+        }
+
+        if (in_array($scope, ['future', 'series'], true) && empty($seriesId)) {
+            throw new \InvalidArgumentException('لا يمكن تطبيق الحذف المتسلسل على هذا الجدول.');
+        }
+
+        $query = Timetable::query();
+
+        if ($scope === 'single') {
+            if (!$timetableId) {
+                throw new \InvalidArgumentException('لم يتم العثور على الحصة المطلوبة.');
+            }
+            $query->where('id', $timetableId);
+        } elseif ($scope === 'future') {
+            $query->where('series_id', $seriesId);
+            if ($eventDate) {
+                $query->whereDate('start_date', '>=', $eventDate);
+            }
+        } else { // series
+            $query->where('series_id', $seriesId);
+        }
+
+        $entries = $query->get();
+
+        if ($entries->isEmpty()) {
+            throw new \InvalidArgumentException('لم يتم العثور على الحصص المطلوبة للحذف.');
+        }
+
+        $lessonsDeleted = 0;
+
+        DB::transaction(function () use ($entries, &$lessonsDeleted) {
+            foreach ($entries as $entry) {
+                $lessonsDeleted += Lessons::whereDate('lesson_date', $entry->start_date)
+                    ->where('student_id', $entry->student_id)
+                    ->where('teacher_id', $entry->teacher_id)
+                    ->delete();
+
+                $entry->delete();
+            }
+        });
+
+        $message = match ($scope) {
+            'future' => __('تم حذف الحصص القادمة بنجاح'),
+            'series' => __('تم حذف الجدول وجميع حصصه بنجاح'),
+            default => __('تم حذف الحصة بنجاح'),
+        };
+
+        return [
+            'message' => $message,
+            'entries_deleted' => $entries->count(),
+            'lessons_deleted' => $lessonsDeleted,
+        ];
     }
 
     /**

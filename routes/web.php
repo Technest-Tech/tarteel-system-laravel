@@ -124,6 +124,15 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('families/remove-student/{family_id}/{student_id}', [\App\Http\Controllers\Admin\Families\FamiliesController::class,'removeStudent'])->name('families.remove.student');
         Route::get('families/{id}/{year?}/{month?}', [\App\Http\Controllers\Admin\Families\FamiliesController::class,'show'])->name('families.show');
 
+        Route::prefix('admin/timetables')->name('admin.timetables.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\Timetables\TimetablesController::class, 'index'])->name('index');
+            Route::get('/list', [\App\Http\Controllers\Admin\Timetables\TimetablesController::class, 'list'])->name('list');
+            Route::get('/{series}', [\App\Http\Controllers\Admin\Timetables\TimetablesController::class, 'show'])->name('show');
+            Route::post('/', [\App\Http\Controllers\Admin\Timetables\TimetablesController::class, 'store'])->name('store');
+            Route::put('/{series}', [\App\Http\Controllers\Admin\Timetables\TimetablesController::class, 'update'])->name('update');
+            Route::delete('/{series}', [\App\Http\Controllers\Admin\Timetables\TimetablesController::class, 'destroy'])->name('destroy');
+        });
+
         //calendar
         Route::get('admin/calendar', [\App\Http\Controllers\Admin\Calendar\CalendarController::class,'index'])->name('admin.calendar.index');
         Route::get('admin/calendar/delete/{id}', [\App\Http\Controllers\Admin\Calendar\CalendarController::class,'destroy'])->where('id', '.*')->name('admin.calendar.delete');

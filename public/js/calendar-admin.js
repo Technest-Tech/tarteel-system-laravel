@@ -33,6 +33,74 @@ function initCalendarAdmin() {
         teacher_id: ''
     };
 
+    const teacherListEl = document.getElementById('calendarTeacherList');
+    const resetTeacherFilterBtn = document.getElementById('resetTeacherFilter');
+    const singleEventModalEl = document.getElementById('singleEventModal');
+    const singleEventModal = singleEventModalEl ? new bootstrap.Modal(singleEventModalEl) : null;
+    const singleEventForm = document.getElementById('singleEventForm');
+    const saveSingleEventBtn = document.getElementById('saveSingleEventBtn');
+    const saveSingleEventSpinner = saveSingleEventBtn ? saveSingleEventBtn.querySelector('.spinner-border') : null;
+    const deleteEventModalEl = document.getElementById('deleteEventModal');
+    const deleteEventModal = deleteEventModalEl ? new bootstrap.Modal(deleteEventModalEl) : null;
+    const deleteEventScope = document.getElementById('delete_event_scope');
+    const deleteEventDescription = document.getElementById('delete_event_description');
+    const confirmDeleteEventBtn = document.getElementById('confirmDeleteEventBtn');
+    const confirmDeleteEventSpinner = confirmDeleteEventBtn ? confirmDeleteEventBtn.querySelector('.spinner-border') : null;
+
+    let pendingDeleteContext = null;
+    const searchableControls = {};
+
+    function initSearchableSelects() {
+        if (typeof Choices === 'undefined') {
+            return;
+        }
+
+        document.querySelectorAll('.js-searchable').forEach((select) => {
+            const controlKey = select.id || select.name;
+            if (!controlKey || searchableControls[controlKey]) {
+                return;
+            }
+
+            const placeholderOption = select.options.length && select.options[0].value === ''
+                ? select.options[0].text
+                : '';
+
+            searchableControls[controlKey] = new Choices(select, {
+                searchEnabled: true,
+                itemSelectText: '',
+                removeItemButton: false,
+                shouldSort: false,
+                allowHTML: false,
+                placeholder: placeholderOption !== '',
+                placeholderValue: placeholderOption,
+            });
+        });
+    }
+
+    function setSelectValue(selectId, value) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        const control = searchableControls[selectId];
+        if (control) {
+            control.setChoiceByValue(value !== null && value !== undefined ? String(value) : '');
+        } else {
+            select.value = value || '';
+        }
+    }
+
+    function resetSelect(selectId) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        const control = searchableControls[selectId];
+        if (control) {
+            control.removeActiveItems();
+        } else {
+            select.value = '';
+        }
+    }
+
+    initSearchableSelects();
+
     // Detect mobile device
     const isMobile = window.innerWidth <= 768;
     
@@ -101,6 +169,7 @@ function initCalendarAdmin() {
                     successCallback([]);
                 });
         },
+        dateClick: handleDateClick,
         eventClick: function(info) {
             currentEvent = info.event;
             loadLessonDetails(info.event.id);
@@ -114,6 +183,12 @@ function initCalendarAdmin() {
             info.el.style.whiteSpace = 'normal';
             info.el.style.minHeight = 'auto';
             info.el.style.height = 'auto';
+
+            const eventColor = info.event.extendedProps.color || info.event.backgroundColor || info.event.borderColor;
+            if (eventColor) {
+                info.el.style.backgroundColor = eventColor;
+                info.el.style.borderColor = eventColor;
+            }
             
             // Create a more informative title with time
             const startTime = info.event.start ? new Date(info.event.start).toLocaleTimeString('ar-EG', { 
@@ -285,6 +360,70 @@ function initCalendarAdmin() {
 
     calendar.render();
 
+    function handleDateClick(info) {
+        if (!singleEventModal || !singleEventForm) {
+            return;
+        }
+
+        const isoString = info.dateStr || (info.date ? info.date.toISOString() : null);
+        if (!isoString) {
+            return;
+        }
+
+        const datePart = isoString.split('T')[0];
+        let startTime = '17:00';
+
+        if (info.date) {
+            const localDate = new Date(info.date);
+            const hours = localDate.getHours();
+            const minutes = localDate.getMinutes();
+            if (hours !== 0 || minutes !== 0) {
+                startTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            }
+        }
+
+        const endTime = addMinutesToTime(startTime, 30);
+
+        prepareSingleEventModal({
+            date: datePart,
+            startTime,
+            endTime,
+        });
+    }
+
+    function prepareSingleEventModal({ date, startTime, endTime }) {
+        if (!singleEventModal || !singleEventForm) {
+            return;
+        }
+
+        singleEventForm.reset();
+        const dateInput = document.getElementById('single_event_date');
+        const startInput = document.getElementById('single_event_start_time');
+        const endInput = document.getElementById('single_event_end_time');
+        resetSelect('single_event_student');
+        resetSelect('single_event_teacher');
+
+        if (dateInput) dateInput.value = date;
+        if (startInput) startInput.value = startTime;
+        if (endInput) endInput.value = endTime;
+        if (currentFilters.student_id) {
+            setSelectValue('single_event_student', currentFilters.student_id);
+        }
+        if (currentFilters.teacher_id) {
+            setSelectValue('single_event_teacher', currentFilters.teacher_id);
+        }
+
+        singleEventModal.show();
+    }
+
+    function addMinutesToTime(timeString, minutesToAdd) {
+        const [hours, minutes] = timeString.split(':').map(Number);
+        const baseDate = new Date();
+        baseDate.setHours(hours, minutes, 0, 0);
+        baseDate.setMinutes(baseDate.getMinutes() + minutesToAdd);
+        return `${baseDate.getHours().toString().padStart(2, '0')}:${baseDate.getMinutes().toString().padStart(2, '0')}`;
+    }
+
     // Dynamic Schedule Rows Management
     const scheduleRowsContainer = document.getElementById('scheduleRowsContainer');
     const lessonForm = document.getElementById('lessonForm');
@@ -300,11 +439,11 @@ function initCalendarAdmin() {
             
             if (endTimeInput) {
                 endTimeInput.addEventListener('change', function() {
-                    if (startTimeInput.value && endTimeInput.value && startTimeInput.value >= endTimeInput.value) {
+                    if (startTimeInput.value && endTimeInput.value && startTimeInput.value === endTimeInput.value) {
                         Swal.fire({
                             icon: 'warning',
                             title: 'تحذير',
-                            text: 'وقت النهاية يجب أن يكون بعد وقت البداية',
+                            text: 'وقت النهاية يجب أن يختلف عن وقت البداية',
                             confirmButtonText: 'حسناً'
                         });
                         endTimeInput.value = '';
@@ -356,11 +495,11 @@ function initCalendarAdmin() {
                 }
 
                 // Validate time range
-                if (startTime >= endTime) {
+                if (startTime === endTime) {
                     Swal.fire({
                         icon: 'error',
                         title: 'خطأ',
-                        text: 'وقت النهاية يجب أن يكون بعد وقت البداية في يوم ' + dayName,
+                        text: 'وقت النهاية يجب أن يختلف عن وقت البداية في يوم ' + dayName,
                         confirmButtonText: 'حسناً'
                     });
                     return;
@@ -535,7 +674,10 @@ function initCalendarAdmin() {
         // Calculate duration
         const startTime = new Date('2000-01-01T' + timetable.start_time);
         const endTime = new Date('2000-01-01T' + timetable.end_time);
-        const duration = (endTime - startTime) / (1000 * 60 * 60);
+        let duration = (endTime - startTime) / (1000 * 60 * 60);
+        if (duration <= 0) {
+            duration += 24;
+        }
         
         modalBody.innerHTML = `
             <div class="row">
@@ -551,6 +693,7 @@ function initCalendarAdmin() {
                 <div class="col-md-6 mb-3">
                     <strong>اسم الحصة:</strong> ${timetable.lesson_name || 'N/A'}
                 </div>
+                ${timetable.color ? `<div class="col-md-6 mb-3"><strong>لون الجدول:</strong> <span class="badge rounded-pill" style="background-color:${timetable.color}; color:#fff;">${timetable.color}</span></div>` : ''}
                 ${eventDate ? `<div class="col-md-6 mb-3"><strong>تاريخ الحصة:</strong> ${new Date(eventDate).toLocaleDateString('ar-EG')}</div>` : ''}
                 <div class="col-md-6 mb-3">
                     <strong>تاريخ البداية:</strong> ${new Date(timetable.start_date).toLocaleDateString('ar-EG')}
@@ -573,10 +716,14 @@ function initCalendarAdmin() {
         document.getElementById('editLessonBtn').classList.remove('d-none');
         document.getElementById('deleteLessonBtn').classList.remove('d-none');
         document.getElementById('editLessonBtn').onclick = () => openEditModal(timetable, eventDate, eventId);
-        // Use eventId directly if it's a lesson (l_*) or timetable with date (t_*_date)
-        // Otherwise use timetable.id for full timetable deletion
-        const deleteId = eventId && (eventId.startsWith('l_') || eventId.startsWith('t_')) ? eventId : (timetable.id || eventId);
-        document.getElementById('deleteLessonBtn').onclick = () => deleteLesson(timetable.id, eventDate, deleteId);
+
+        const deleteContext = {
+            timetableId: timetable.id,
+            eventDate: eventDate || null,
+            eventId: eventId || null,
+            seriesId: timetable.series_id || (currentEvent?.extendedProps?.series_id ?? null),
+        };
+        document.getElementById('deleteLessonBtn').onclick = () => openDeleteEventModal(deleteContext);
         
         modal.show();
     }
@@ -590,8 +737,8 @@ function initCalendarAdmin() {
         document.getElementById('edit_original_event_date').value = eventDate || '';
         
         // Populate only the fields shown in modal
-        document.getElementById('edit_student_id').value = timetable.student_id;
-        document.getElementById('edit_teacher_id').value = timetable.teacher_id;
+        setSelectValue('edit_student_id', timetable.student_id);
+        setSelectValue('edit_teacher_id', timetable.teacher_id);
         document.getElementById('edit_event_date_display').value = eventDate || '';
         document.getElementById('edit_start_time').value = timetable.start_time;
         document.getElementById('edit_end_time').value = timetable.end_time;
@@ -625,11 +772,11 @@ function initCalendarAdmin() {
             return;
         }
 
-        if (data.start_time >= data.end_time) {
+        if (data.start_time === data.end_time) {
             Swal.fire({
                 icon: 'error',
                 title: 'خطأ',
-                text: 'وقت النهاية يجب أن يكون بعد وقت البداية',
+                text: 'وقت النهاية يجب أن يختلف عن وقت البداية',
                 confirmButtonText: 'حسناً'
             });
             return;
@@ -693,37 +840,235 @@ function initCalendarAdmin() {
         });
     });
 
-    // Delete lesson or timetable entry
-    function deleteLesson(timetableId, eventDate, eventId) {
-        Swal.fire({
-            title: 'هل أنت متأكد؟',
-            text: eventDate ? "سيتم حذف هذه الحصة فقط لهذا اليوم" : 'لا يمكن التراجع عن هذا الإجراء',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'نعم، احذف',
-            cancelButtonText: 'إلغاء'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // If eventDate is provided, delete the lesson for that specific date
-                // Otherwise, delete the entire timetable entry
-                let deleteId;
-                if (eventDate) {
-                    deleteId = 't_' + timetableId + '_' + eventDate;
-                } else if (eventId && eventId.startsWith('l_')) {
-                    deleteId = eventId;
-                } else {
-                    deleteId = timetableId;
-                }
-                
-                // Encode the ID for URL
-                const encodedId = encodeURIComponent(deleteId);
-                
-                // Redirect to delete route
-                window.location.href = window.calendarRoutes.delete.replace(':id', encodedId);
+    function openDeleteEventModal(context) {
+        if (!deleteEventModal || !deleteEventScope) {
+            legacyDeleteRedirect(context);
+            return;
+        }
+
+        pendingDeleteContext = context;
+        deleteEventScope.value = 'single';
+        updateDeleteScopeOptions(context);
+        updateDeleteDescription(deleteEventScope.value, context);
+        confirmDeleteEventBtn.disabled = false;
+        if (confirmDeleteEventSpinner) {
+            confirmDeleteEventSpinner.classList.add('d-none');
+        }
+        deleteEventModal.show();
+    }
+
+    function legacyDeleteRedirect(context) {
+        const { timetableId, eventDate, eventId } = context || {};
+        if (!window.calendarRoutes.deleteRedirect) {
+            return;
+        }
+        let deleteKey = timetableId;
+        if (eventDate && timetableId) {
+            deleteKey = `t_${timetableId}_${eventDate}`;
+        } else if (eventId) {
+            deleteKey = eventId;
+        }
+        window.location.href = window.calendarRoutes.deleteRedirect.replace(':id', encodeURIComponent(deleteKey));
+    }
+
+    function updateDeleteScopeOptions(context) {
+        if (!deleteEventScope) return;
+        const hasSeries = Boolean(context?.seriesId);
+        Array.from(deleteEventScope.options).forEach((option) => {
+            if (option.value === 'future' || option.value === 'series') {
+                option.disabled = !hasSeries;
             }
         });
+        if (!hasSeries && deleteEventScope.value !== 'single') {
+            deleteEventScope.value = 'single';
+        }
+    }
+
+    function updateDeleteDescription(scope, context) {
+        if (!deleteEventDescription) return;
+        const eventDate = context?.eventDate ? new Date(context.eventDate).toLocaleDateString('ar-EG') : '';
+        let message = '';
+        switch (scope) {
+            case 'future':
+                message = 'سيتم حذف هذه الحصة وجميع الحصص التالية في هذا الجدول.';
+                break;
+            case 'series':
+                message = 'سيتم حذف الجدول بالكامل وجميع الحصص المرتبطة به.';
+                break;
+            default:
+                message = eventDate ? `سيتم حذف الحصة بتاريخ ${eventDate} فقط.` : 'سيتم حذف هذه الحصة فقط.';
+        }
+        deleteEventDescription.textContent = message;
+    }
+
+    async function executeDeleteEvent() {
+        if (!pendingDeleteContext || !confirmDeleteEventBtn) {
+            return;
+        }
+
+        const payload = {
+            scope: deleteEventScope ? deleteEventScope.value : 'single',
+            timetable_id: pendingDeleteContext.timetableId,
+            event_date: pendingDeleteContext.eventDate,
+            series_id: pendingDeleteContext.seriesId,
+            event_id: pendingDeleteContext.eventId,
+        };
+
+        if (!window.calendarRoutes.destroy) {
+            legacyDeleteRedirect(pendingDeleteContext);
+            pendingDeleteContext = null;
+            return;
+        }
+
+        confirmDeleteEventBtn.disabled = true;
+        if (confirmDeleteEventSpinner) {
+            confirmDeleteEventSpinner.classList.remove('d-none');
+        }
+
+        try {
+            const response = await fetch(window.calendarRoutes.destroy, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': window.csrfToken,
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.json().catch(() => ({}));
+                throw new Error(errorBody.message || 'فشل حذف الحصة');
+            }
+
+            const result = await response.json();
+            Swal.fire({
+                icon: 'success',
+                title: 'تم الحذف',
+                text: result.message || 'تم حذف الحصة بنجاح.',
+                confirmButtonText: 'حسناً'
+            });
+
+            deleteEventModal.hide();
+            calendar.refetchEvents();
+        } catch (error) {
+            console.error('Delete error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: error.message || 'حدث خطأ أثناء حذف الحصة.',
+                confirmButtonText: 'حسناً'
+            });
+        } finally {
+            pendingDeleteContext = null;
+            confirmDeleteEventBtn.disabled = false;
+            if (confirmDeleteEventSpinner) {
+                confirmDeleteEventSpinner.classList.add('d-none');
+            }
+        }
+    }
+
+    async function submitSingleEvent() {
+        if (!singleEventForm || !saveSingleEventBtn) {
+            return;
+        }
+
+        const formData = new FormData(singleEventForm);
+        const studentId = formData.get('student_id');
+        const teacherId = formData.get('teacher_id');
+        const startTime = formData.get('start_time');
+        const endTime = formData.get('end_time');
+        const lessonName = formData.get('lesson_name');
+        const eventDate = formData.get('event_date');
+
+        if (!studentId || !teacherId || !startTime || !endTime || !eventDate) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'يرجى ملء جميع الحقول المطلوبة.',
+                confirmButtonText: 'حسناً'
+            });
+            return;
+        }
+
+        if (startTime === endTime) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'تحذير',
+                text: 'وقت النهاية يجب أن يختلف عن وقت البداية.',
+                confirmButtonText: 'حسناً'
+            });
+            return;
+        }
+
+        const dayOfWeek = new Date(`${eventDate}T00:00:00`).getDay();
+
+        const payload = {
+            start_date: eventDate,
+            end_date: eventDate,
+            timezone: 'Africa/Cairo',
+            schedule_entries: [
+                {
+                    student_id: studentId,
+                    teacher_id: teacherId,
+                    start_time: startTime,
+                    end_time: endTime,
+                    day: dayOfWeek,
+                    lesson_name: lessonName || 'Lesson',
+                    notification_minutes: 30,
+                },
+            ],
+        };
+
+        saveSingleEventBtn.disabled = true;
+        if (saveSingleEventSpinner) {
+            saveSingleEventSpinner.classList.remove('d-none');
+        }
+
+        try {
+            const response = await fetch(window.calendarRoutes.store, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': window.csrfToken,
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.json().catch(() => ({}));
+                throw new Error(errorBody.message || 'فشل حفظ الحصة');
+            }
+
+            const result = await response.json();
+            Swal.fire({
+                icon: 'success',
+                title: 'تم الحفظ',
+                text: result.message || 'تم حفظ الحصة بنجاح.',
+                confirmButtonText: 'حسناً'
+            });
+
+            if (singleEventModal) {
+                singleEventModal.hide();
+            }
+            calendar.refetchEvents();
+        } catch (error) {
+            console.error('Single event error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: error.message || 'حدث خطأ أثناء حفظ الحصة.',
+                confirmButtonText: 'حسناً'
+            });
+        } finally {
+            saveSingleEventBtn.disabled = false;
+            if (saveSingleEventSpinner) {
+                saveSingleEventSpinner.classList.add('d-none');
+            }
+        }
     }
 
     // Helper function to format time from 24-hour to 12-hour format
@@ -749,14 +1094,83 @@ function initCalendarAdmin() {
     const applyFiltersBtn = document.getElementById('applyFiltersBtn');
     const filterStudent = document.getElementById('filter_student');
     const filterTeacher = document.getElementById('filter_teacher');
+
+    function highlightTeacherSelection(teacherId) {
+        if (!teacherListEl) return;
+        const items = teacherListEl.querySelectorAll('[data-teacher-id]');
+        items.forEach((item) => {
+            const value = item.getAttribute('data-teacher-id') || '';
+            if ((teacherId || '') === value) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    }
+
+    function setTeacherFilter(teacherId, shouldRefetch = true) {
+        currentFilters.teacher_id = teacherId || '';
+        if (filterTeacher) {
+            setSelectValue('filter_teacher', currentFilters.teacher_id);
+        }
+        highlightTeacherSelection(currentFilters.teacher_id);
+        if (shouldRefetch && calendar) {
+            calendar.refetchEvents();
+        }
+    }
     
     if (applyFiltersBtn) {
         applyFiltersBtn.addEventListener('click', function() {
             currentFilters.student_id = filterStudent ? filterStudent.value : '';
-            currentFilters.teacher_id = filterTeacher ? filterTeacher.value : '';
+            const teacherId = filterTeacher ? filterTeacher.value : '';
+            setTeacherFilter(teacherId, false);
             calendar.refetchEvents();
         });
     }
+
+    if (teacherListEl) {
+        teacherListEl.addEventListener('click', function(event) {
+            const button = event.target.closest('button[data-teacher-id]');
+            if (!button) {
+                return;
+            }
+            event.preventDefault();
+            const teacherId = button.getAttribute('data-teacher-id') || '';
+            setTeacherFilter(teacherId, true);
+        });
+    }
+
+    if (resetTeacherFilterBtn) {
+        resetTeacherFilterBtn.addEventListener('click', function() {
+            setTeacherFilter('', true);
+        });
+    }
+
+    if (saveSingleEventBtn) {
+        saveSingleEventBtn.addEventListener('click', submitSingleEvent);
+    }
+
+    if (singleEventModalEl) {
+        singleEventModalEl.addEventListener('hidden.bs.modal', function() {
+            if (singleEventForm) {
+                singleEventForm.reset();
+            }
+            resetSelect('single_event_student');
+            resetSelect('single_event_teacher');
+        });
+    }
+
+    if (deleteEventScope) {
+        deleteEventScope.addEventListener('change', function() {
+            updateDeleteDescription(deleteEventScope.value, pendingDeleteContext);
+        });
+    }
+
+    if (confirmDeleteEventBtn) {
+        confirmDeleteEventBtn.addEventListener('click', executeDeleteEvent);
+    }
+
+    highlightTeacherSelection(currentFilters.teacher_id);
 
     // Export functionality
     console.log('Setting up export functionality...');

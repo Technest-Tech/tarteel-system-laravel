@@ -40,6 +40,8 @@
 
                     <li class="nav-item"> <a class="nav-link @if(request()->is('custom_billings')) active @endif" href="{{route('custom_billings.index')}}"><i class="fas fa-file fa-fw me-2"></i>الفواتيير اليدوية </a></li>
 
+                    <li class="nav-item"> <a class="nav-link @if(request()->is('admin/timetables*')) active @endif" href="{{route('admin.timetables.index')}}"><i class="fas fa-calendar-week fa-fw me-2"></i>جداول الطلاب</a></li>
+
                     <li class="nav-item"> <a class="nav-link @if(request()->is('admin/calendar*')) active @endif" href="{{route('admin.calendar.index')}}"><i class="fas fa-calendar-alt fa-fw me-2"></i>تقويم الحصص</a></li>
 
                     <li class="nav-item"> <a class="nav-link @if(request()->is('admin/settings*')) active @endif" href="{{route('admin.settings.index')}}"><i class="fas fa-cog fa-fw me-2"></i>الإعدادات</a></li>
