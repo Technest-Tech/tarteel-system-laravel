@@ -42,7 +42,12 @@ class TimetablesController extends Controller
             'teacher_id' => 'nullable|exists:users,id',
             'period_from' => 'nullable|date',
             'period_to' => 'nullable|date|after_or_equal:period_from',
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
         ]);
+
+        $perPage = $request->input('per_page', 15);
+        $page = $request->input('page', 1);
 
         $query = Timetable::with(['student', 'teacher'])
             ->when($request->filled('student_id'), function ($q) use ($request) {
@@ -106,7 +111,23 @@ class TimetablesController extends Controller
             ];
         })->values();
 
-        return response()->json(['data' => $data]);
+        // Manual pagination for grouped collection
+        $total = $data->count();
+        $offset = ($page - 1) * $perPage;
+        $paginatedData = $data->slice($offset, $perPage)->values();
+        $lastPage = (int) ceil($total / $perPage);
+
+        return response()->json([
+            'data' => $paginatedData,
+            'pagination' => [
+                'current_page' => (int) $page,
+                'per_page' => (int) $perPage,
+                'total' => $total,
+                'last_page' => $lastPage,
+                'from' => $total > 0 ? $offset + 1 : 0,
+                'to' => min($offset + $perPage, $total),
+            ]
+        ]);
     }
 
     /**

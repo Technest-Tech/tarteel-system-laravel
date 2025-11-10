@@ -34,6 +34,9 @@
     const state = {
         listLoading: false,
         saving: false,
+        currentPage: 1,
+        perPage: 15,
+        pagination: null,
     };
 
     const searchableControls = {};
@@ -155,6 +158,8 @@
         if (teacherId) params.append('teacher_id', teacherId);
         if (periodFrom) params.append('period_from', periodFrom);
         if (periodTo) params.append('period_to', periodTo);
+        params.append('page', state.currentPage);
+        params.append('per_page', state.perPage);
 
         try {
             const response = await fetch(`${window.timetableRoutes.list}?${params.toString()}`, {
@@ -168,8 +173,10 @@
                 throw new Error('فشل في تحميل الجداول');
             }
 
-            const data = await response.json();
-            renderTableRows(data.data || []);
+            const result = await response.json();
+            renderTableRows(result.data || []);
+            state.pagination = result.pagination || null;
+            renderPagination();
         } catch (error) {
             console.error(error);
             renderTableRows([]);
@@ -181,6 +188,89 @@
         } finally {
             state.listLoading = false;
         }
+    }
+
+    function renderPagination() {
+        const paginationContainer = document.getElementById('timetablePagination');
+        if (!paginationContainer || !state.pagination) {
+            if (paginationContainer) {
+                paginationContainer.innerHTML = '';
+            }
+            return;
+        }
+
+        const pag = state.pagination;
+        const currentPage = pag.current_page;
+        const lastPage = pag.last_page;
+
+        if (lastPage <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+
+        let html = '<nav aria-label="Page navigation"><ul class="pagination justify-content-center mb-0">';
+
+        // Previous button
+        html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" data-page="${currentPage - 1}" ${currentPage === 1 ? 'tabindex="-1" aria-disabled="true"' : ''}>السابق</a>
+        </li>`;
+
+        // Page numbers
+        const maxPagesToShow = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(lastPage, startPage + maxPagesToShow - 1);
+
+        if (endPage - startPage < maxPagesToShow - 1) {
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
+        }
+
+        if (startPage > 1) {
+            html += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
+            if (startPage > 2) {
+                html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" data-page="${i}">${i}</a>
+            </li>`;
+        }
+
+        if (endPage < lastPage) {
+            if (endPage < lastPage - 1) {
+                html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            }
+            html += `<li class="page-item"><a class="page-link" href="#" data-page="${lastPage}">${lastPage}</a></li>`;
+        }
+
+        // Next button
+        html += `<li class="page-item ${currentPage === lastPage ? 'disabled' : ''}">
+            <a class="page-link" href="#" data-page="${currentPage + 1}" ${currentPage === lastPage ? 'tabindex="-1" aria-disabled="true"' : ''}>التالي</a>
+        </li>`;
+
+        html += '</ul></nav>';
+
+        // Add info text
+        html += `<div class="text-center mt-2 text-muted small">
+            عرض ${pag.from} إلى ${pag.to} من ${pag.total} جدول
+        </div>`;
+
+        paginationContainer.innerHTML = html;
+
+        // Attach event listeners
+        paginationContainer.querySelectorAll('a[data-page]').forEach((link) => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = parseInt(link.getAttribute('data-page'), 10);
+                if (page >= 1 && page <= lastPage && page !== currentPage) {
+                    state.currentPage = page;
+                    fetchTimetables();
+                    // Scroll to top of table
+                    document.querySelector('#timetablesTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
     }
 
     function resetForm() {
@@ -373,6 +463,7 @@
             });
 
             timetableModal.hide();
+            state.currentPage = 1;
             fetchTimetables();
         } catch (error) {
             console.error(error);
@@ -418,6 +509,7 @@
             });
 
             deleteModal.hide();
+            state.currentPage = 1;
             fetchTimetables();
         } catch (error) {
             console.error(error);
@@ -445,13 +537,17 @@
         event.preventDefault();
     });
 
-    document.getElementById('applyTimetableFilters').addEventListener('click', fetchTimetables);
+    document.getElementById('applyTimetableFilters').addEventListener('click', () => {
+        state.currentPage = 1;
+        fetchTimetables();
+    });
 
     document.getElementById('resetTimetableFilters').addEventListener('click', () => {
         setSelectValue('filter_student', '');
         setSelectValue('filter_teacher', '');
         document.getElementById('filter_period_from').value = '';
         document.getElementById('filter_period_to').value = '';
+        state.currentPage = 1;
         fetchTimetables();
     });
 

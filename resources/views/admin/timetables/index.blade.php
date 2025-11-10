@@ -82,6 +82,7 @@
                             </tbody>
                         </table>
                     </div>
+                    <div id="timetablePagination" class="mt-3"></div>
                 </div>
             </div>
         </div>
