@@ -28,6 +28,48 @@
     border-color: #066ac9;
 }
 
+.filters-card {
+    overflow: visible !important;
+    position: relative;
+    z-index: 3000;
+}
+
+.filters-card .card-body {
+    overflow: visible !important;
+    position: relative;
+    z-index: 3001;
+}
+
+.filters-card .choices {
+    position: relative;
+    z-index: 3002;
+}
+
+.filters-card .choices__inner {
+    position: relative;
+    z-index: 3002;
+    min-height: 38px;
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.filters-card .choices__list--dropdown,
+.filters-card .choices__list--dropdown.is-active,
+.filters-card .choices__list {
+    position: absolute;
+    z-index: 9999 !important;
+}
+
+.filters-card .choices__list--dropdown.is-active {
+    z-index: 9999 !important;
+}
+
+.timetable-card {
+    position: relative;
+    z-index: 1000;
+}
+
 #timetablesTable tbody tr td {
     vertical-align: middle;
 }

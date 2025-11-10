@@ -13,7 +13,7 @@
 
     <div class="row mb-3">
         <div class="col-12">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm filters-card">
                 <div class="card-body">
                     <form id="timetableFilters" class="row g-3 align-items-end">
                         <div class="col-md-3">
@@ -58,7 +58,7 @@
 
     <div class="row">
         <div class="col-12">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm timetable-card">
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped align-middle" id="timetablesTable">
