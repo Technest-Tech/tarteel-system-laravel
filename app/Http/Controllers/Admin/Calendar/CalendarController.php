@@ -141,7 +141,8 @@ class CalendarController extends Controller
 
                 $eventDateStr = $eventDate->format('Y-m-d');
                 $seriesId = $entry->series_id;
-                $color = $entry->color ?: $this->getEventColor($entry->student_id);
+                // Use timetable color if set, otherwise use teacher's color
+                $color = $entry->color ?: $this->getTeacherColor($entry->teacher_id);
 
                 $events[] = [
                     'id' => 't_' . $entry->id . '_' . $eventDateStr,
@@ -230,7 +231,8 @@ class CalendarController extends Controller
             $seriesId = $entry['series_id'] ?? $request->input('series_id') ?? (string) Str::uuid();
             $color = $entry['color'] ?? $request->input('color');
             if (!$color) {
-                $color = $this->getEventColor($entry['student_id']);
+                // Use teacher's color if no color is provided
+                $color = $this->getTeacherColor($entry['teacher_id'] ?? $request->input('teacher_id'));
             }
             
             // Loop through all dates from start_date to end_date
@@ -718,5 +720,20 @@ class CalendarController extends Controller
         ];
 
         return $colors[$studentId % count($colors)];
+    }
+
+    private function getTeacherColor($teacherId)
+    {
+        if (!$teacherId) {
+            return '#3b82f6'; // default blue
+        }
+        
+        $teacher = \App\Models\User::find($teacherId);
+        if ($teacher && $teacher->color) {
+            return $teacher->color;
+        }
+        
+        // Fallback to default color
+        return '#3b82f6';
     }
 }

@@ -320,6 +320,10 @@ class TimetablesController extends Controller
         $endDate = Carbon::createFromFormat('Y-m-d', $payload['end_date'])->endOfDay();
 
         $color = $payload['color'] ?? null;
+        // If no color provided, use teacher's color
+        if (!$color && isset($payload['teacher_id'])) {
+            $color = $this->getTeacherColor($payload['teacher_id']);
+        }
         $notificationMinutes = isset($payload['notification_minutes'])
             ? (int) $payload['notification_minutes']
             : 30;
@@ -351,5 +355,23 @@ class TimetablesController extends Controller
         }
 
         return $entriesCount;
+    }
+
+    /**
+     * Get teacher's color from database
+     */
+    private function getTeacherColor($teacherId)
+    {
+        if (!$teacherId) {
+            return '#3b82f6'; // default blue
+        }
+        
+        $teacher = User::find($teacherId);
+        if ($teacher && $teacher->color) {
+            return $teacher->color;
+        }
+        
+        // Fallback to default color
+        return '#3b82f6';
     }
 }

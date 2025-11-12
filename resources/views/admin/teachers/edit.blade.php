@@ -49,6 +49,11 @@
                                 <label for="salaryEnglish" class="form-label">راتب الإنجليزي</label>
                                 <input type="text" inputmode="decimal" pattern="[0-9]*\.?[0-9]*" name="salary_english" class="form-control" id="salaryEnglish" value="{{$teacher->salary_english ?? ''}}" placeholder="سعر الساعة للطلاب الإنجليز" autocomplete="off">
                             </div> <br>
+                            <div class="form-group">
+                                <label for="teacherColor" class="form-label">لون الحصص</label>
+                                <input type="color" class="form-control form-control-color" id="teacherColor" name="color" value="{{$teacher->color ?? '#3b82f6'}}" title="اختر لون حصص هذا المعلم">
+                                <small class="form-text text-muted">سيتم استخدام هذا اللون لحصص هذا المعلم في التقويم</small>
+                            </div> <br>
 
                             <button type="submit" class="btn btn-primary"> تعديل</button>
                         </form>

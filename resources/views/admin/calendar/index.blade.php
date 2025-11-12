@@ -437,7 +437,7 @@
                         <select class="form-select js-searchable" id="single_event_teacher" name="teacher_id" required>
                             <option value="" disabled selected>اختر المعلم</option>
                             @foreach($teachers as $teacher)
-                                <option value="{{ $teacher->id }}">{{ $teacher->user_name }}</option>
+                                <option value="{{ $teacher->id }}" data-color="{{ $teacher->color ?? '#3b82f6' }}">{{ $teacher->user_name }}</option>
                             @endforeach
                         </select>
                     </div>

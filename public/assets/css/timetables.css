@@ -31,23 +31,23 @@
 .filters-card {
     overflow: visible !important;
     position: relative;
-    z-index: 3000;
+    z-index: 1;
 }
 
 .filters-card .card-body {
     overflow: visible !important;
     position: relative;
-    z-index: 3001;
+    z-index: 1;
 }
 
 .filters-card .choices {
     position: relative;
-    z-index: 3002;
+    z-index: 1;
 }
 
 .filters-card .choices__inner {
     position: relative;
-    z-index: 3002;
+    z-index: 1;
     min-height: 38px;
     padding: 0.5rem 0.75rem;
     display: flex;
@@ -65,9 +65,52 @@
     z-index: 9999 !important;
 }
 
+/* Ensure timetable modals appear above filters */
+/* Backdrop should be below modal */
+#timetableModal.modal,
+#deleteSeriesModal.modal {
+    z-index: 1055 !important;
+    position: fixed;
+}
+
+#timetableModal.modal .modal-dialog,
+#deleteSeriesModal.modal .modal-dialog {
+    z-index: 1055 !important;
+    position: relative;
+}
+
+#timetableModal.modal .modal-content,
+#deleteSeriesModal.modal .modal-content {
+    z-index: 1055 !important;
+    position: relative;
+}
+
+/* Ensure backdrop is below modal */
+.modal-backdrop.show {
+    z-index: 1040 !important;
+}
+
 .timetable-card {
     position: relative;
-    z-index: 1000;
+    z-index: 1;
+}
+
+/* Ensure timetable elements stay below sidebar/offcanvas on mobile */
+@media (max-width: 991.98px) {
+    .filters-card,
+    .timetable-card {
+        z-index: 1 !important;
+        position: relative;
+    }
+    
+    /* Ensure offcanvas sidebar appears above timetable content */
+    .offcanvas.show {
+        z-index: 1045 !important;
+    }
+    
+    .offcanvas-backdrop.show {
+        z-index: 1040 !important;
+    }
 }
 
 #timetablesTable tbody tr td {

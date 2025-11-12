@@ -1113,3 +1113,99 @@
     background: #055a9e;
 }
 
+/* Ensure calendar elements stay below sidebar/offcanvas on mobile */
+@media (max-width: 991.98px) {
+    /* Override ALL high z-index values for filter section - use universal selector approach */
+    .page-content-wrapper > .row.mb-3,
+    .page-content-wrapper > .row.mb-3 > .col-12,
+    .page-content-wrapper > .row.mb-3 .card,
+    .page-content-wrapper > .row.mb-3 .card.shadow-sm,
+    .page-content-wrapper > .row.mb-3 .card-body,
+    .page-content-wrapper > .row.mb-3 .card-body > *,
+    .page-content-wrapper > .row.mb-3 .row.g-3,
+    .page-content-wrapper > .row.mb-3 .col-md-3 {
+        z-index: 1 !important;
+        position: relative !important;
+    }
+    
+    /* Filter section cards - override all high z-index values */
+    .row.mb-3,
+    .row.mb-3 .card,
+    .row.mb-3 .card.shadow-sm,
+    .row.mb-3 .card-body,
+    .row.mb-3:has(#exportBtn),
+    .row.mb-3:has(#exportBtn) .card,
+    .row.mb-3:has(#exportBtn) .card-body,
+    .row.mb-3:not(:has(#exportBtn)),
+    .row.mb-3:not(:has(#exportBtn)) .card,
+    .row.mb-3:has(.card.border-warning),
+    .row.mb-3:has(.card.border-warning) .card {
+        z-index: 1 !important;
+        position: relative !important;
+    }
+    
+    /* Export button and dropdown - below sidebar */
+    .btn-group[role="group"]:has(#exportBtn),
+    .col-md-3:has(#exportBtn),
+    #exportBtn,
+    .btn-group.w-100,
+    .btn-group {
+        z-index: 1 !important;
+        position: relative !important;
+    }
+    
+    /* Export dropdown menu - below sidebar */
+    #exportBtn + .dropdown-menu,
+    .btn-group .dropdown-menu,
+    .dropdown-menu[aria-labelledby="exportBtn"],
+    .dropdown-menu[aria-labelledby="exportBtn"],
+    .dropdown-menu {
+        z-index: 1 !important;
+    }
+    
+    /* All form elements in filter section */
+    .row.mb-3 .form-select,
+    .row.mb-3 .form-control,
+    .row.mb-3 .btn,
+    .row.mb-3 label {
+        z-index: 1 !important;
+        position: relative !important;
+    }
+    
+    /* Calendar card and calendar itself */
+    .card.bg-transparent,
+    .card.bg-transparent .card-body,
+    .card.shadow-sm:has(#calendar),
+    .card.shadow-sm:has(.card-body:has(#calendar)),
+    #calendar,
+    .fc,
+    .fc-scroller,
+    .fc-scroller-liquid-absolute,
+    .fc-daygrid,
+    .fc-timegrid,
+    .row:has(#calendar),
+    .row:has(.card:has(#calendar)) {
+        z-index: 1 !important;
+        position: relative !important;
+    }
+    
+    /* Page wrapper */
+    .page-content-wrapper,
+    .page-content-wrapper .row,
+    .page-content-wrapper .col-12 {
+        z-index: 1 !important;
+        position: relative !important;
+    }
+    
+    /* Ensure offcanvas sidebar appears above all calendar content */
+    .offcanvas,
+    .offcanvas.show {
+        z-index: 1045 !important;
+    }
+    
+    .offcanvas-backdrop,
+    .offcanvas-backdrop.show {
+        z-index: 1040 !important;
+    }
+}
+

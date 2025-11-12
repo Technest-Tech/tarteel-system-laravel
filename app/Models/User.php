@@ -34,7 +34,7 @@ class User extends Authenticatable
         'english' => 'english',
     ];
 
-   protected $fillable = ['user_name', 'email', 'password','user_type','whatsapp_number','hour_price','currency','family_id','student_type','salary_arabic','salary_english','timezone'];
+   protected $fillable = ['user_name', 'email', 'password','user_type','whatsapp_number','hour_price','currency','family_id','student_type','salary_arabic','salary_english','timezone','color'];
 
     public function family()
     {

@@ -100,6 +100,7 @@
     }
 
     initSearchableSelects();
+    setupTeacherColorAutoFill();
 
     function renderTableRows(rows) {
         timetableTableBody.innerHTML = '';
@@ -526,6 +527,25 @@
     }
 
     weekdaySelector.addEventListener('change', toggleWeekdayState);
+
+    // Auto-fill color when teacher is selected
+    function setupTeacherColorAutoFill() {
+        const teacherSelect = document.getElementById('timetable_teacher_id');
+        if (!teacherSelect) return;
+        
+        // Listen to change event (works with both native select and Choices.js)
+        teacherSelect.addEventListener('change', function() {
+            const selectedValue = this.value;
+            const selectedOption = this.querySelector(`option[value="${selectedValue}"]`);
+            const teacherColor = selectedOption ? selectedOption.getAttribute('data-color') : null;
+            if (teacherColor) {
+                const colorInput = document.getElementById('timetable_color');
+                if (colorInput) {
+                    colorInput.value = teacherColor;
+                }
+            }
+        });
+    }
 
     timetableModalEl.addEventListener('hidden.bs.modal', resetForm);
 

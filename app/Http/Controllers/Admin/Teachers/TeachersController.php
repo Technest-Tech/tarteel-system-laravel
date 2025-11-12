@@ -33,6 +33,7 @@ class TeachersController extends Controller
             'students' => 'required|array',
             'salary_arabic' => 'nullable|numeric',
             'salary_english' => 'nullable|numeric',
+            'color' => 'nullable|string|max:32',
         ]);
 
         $data['user_type'] = User::USER_TYPE['teacher'];
@@ -66,6 +67,7 @@ class TeachersController extends Controller
             'email' => 'required|email',
             'salary_arabic' => 'nullable|numeric',
             'salary_english' => 'nullable|numeric',
+            'color' => 'nullable|string|max:32',
         ]);
         $user = User::find($id);
         $user->update([
@@ -73,6 +75,7 @@ class TeachersController extends Controller
             'email' => $data['email'],
             'salary_arabic' => $data['salary_arabic'] ?? null,
             'salary_english' => $data['salary_english'] ?? null,
+            'color' => $data['color'] ?? null,
         ]);
         return redirect()->route('teachers.index');
     }

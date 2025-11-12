@@ -166,6 +166,11 @@
                             <label for="salaryEnglish" class="form-label">راتب الإنجليزي (سعر الساعة)</label>
                             <input type="number" step="0.01" class="form-control" id="salaryEnglish" name="salary_english" placeholder="سعر الساعة للطلاب الإنجليز">
                         </div>
+                        <div class="mb-3">
+                            <label for="teacherColor" class="form-label">لون الحصص</label>
+                            <input type="color" class="form-control form-control-color" id="teacherColor" name="color" value="#3b82f6" title="اختر لون حصص هذا المعلم">
+                            <small class="form-text text-muted">سيتم استخدام هذا اللون لحصص هذا المعلم في التقويم</small>
+                        </div>
                         <button type="submit" class="btn btn-primary">اضافة</button>
                     </form>
                 </div>
